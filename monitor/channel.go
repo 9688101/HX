@@ -6,7 +6,7 @@ import (
 	"github.com/9688101/HX/common/config"
 	"github.com/9688101/HX/common/logger"
 	"github.com/9688101/HX/common/message"
-	"github.com/9688101/HX/model"
+	"github.com/9688101/HX/internal/entity"
 )
 
 func notifyRootUser(subject string, content string) {
@@ -19,7 +19,7 @@ func notifyRootUser(subject string, content string) {
 		}
 	}
 	if config.RootUserEmail == "" {
-		config.RootUserEmail = model.GetRootUserEmail()
+		config.RootUserEmail = entity.GetRootUserEmail()
 	}
 	err := message.SendEmail(subject, config.RootUserEmail, content)
 	if err != nil {
@@ -29,7 +29,7 @@ func notifyRootUser(subject string, content string) {
 
 // DisableChannel disable & notify
 func DisableChannel(channelId int, channelName string, reason string) {
-	model.UpdateChannelStatusById(channelId, model.ChannelStatusAutoDisabled)
+	entity.UpdateChannelStatusById(channelId, entity.ChannelStatusAutoDisabled)
 	logger.SysLog(fmt.Sprintf("channel #%d has been disabled: %s", channelId, reason))
 	subject := fmt.Sprintf("渠道状态变更提醒")
 	content := message.EmailTemplate(
@@ -45,7 +45,7 @@ func DisableChannel(channelId int, channelName string, reason string) {
 }
 
 func MetricDisableChannel(channelId int, successRate float64) {
-	model.UpdateChannelStatusById(channelId, model.ChannelStatusAutoDisabled)
+	entity.UpdateChannelStatusById(channelId, entity.ChannelStatusAutoDisabled)
 	logger.SysLog(fmt.Sprintf("channel #%d has been disabled due to low success rate: %.2f", channelId, successRate*100))
 	subject := fmt.Sprintf("渠道状态变更提醒")
 	content := message.EmailTemplate(
@@ -62,7 +62,7 @@ func MetricDisableChannel(channelId int, successRate float64) {
 
 // EnableChannel enable & notify
 func EnableChannel(channelId int, channelName string) {
-	model.UpdateChannelStatusById(channelId, model.ChannelStatusEnabled)
+	entity.UpdateChannelStatusById(channelId, entity.ChannelStatusEnabled)
 	logger.SysLog(fmt.Sprintf("channel #%d has been enabled", channelId))
 	subject := fmt.Sprintf("渠道状态变更提醒")
 	content := message.EmailTemplate(

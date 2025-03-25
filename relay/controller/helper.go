@@ -16,7 +16,7 @@ import (
 	"github.com/9688101/HX/common"
 	"github.com/9688101/HX/common/config"
 	"github.com/9688101/HX/common/logger"
-	"github.com/9688101/HX/model"
+	"github.com/9688101/HX/internal/entity"
 	"github.com/9688101/HX/relay/adaptor/openai"
 	billingratio "github.com/9688101/HX/relay/billing/ratio"
 	"github.com/9688101/HX/relay/channeltype"
@@ -68,14 +68,14 @@ func getPreConsumedQuota(textRequest *relaymodel.GeneralOpenAIRequest, promptTok
 func preConsumeQuota(ctx context.Context, textRequest *relaymodel.GeneralOpenAIRequest, promptTokens int, ratio float64, meta *meta.Meta) (int64, *relaymodel.ErrorWithStatusCode) {
 	preConsumedQuota := getPreConsumedQuota(textRequest, promptTokens, ratio)
 
-	userQuota, err := model.CacheGetUserQuota(ctx, meta.UserId)
+	userQuota, err := entity.CacheGetUserQuota(ctx, meta.UserId)
 	if err != nil {
 		return preConsumedQuota, openai.ErrorWrapper(err, "get_user_quota_failed", http.StatusInternalServerError)
 	}
 	if userQuota-preConsumedQuota < 0 {
 		return preConsumedQuota, openai.ErrorWrapper(errors.New("user quota is not enough"), "insufficient_user_quota", http.StatusForbidden)
 	}
-	err = model.CacheDecreaseUserQuota(meta.UserId, preConsumedQuota)
+	err = entity.CacheDecreaseUserQuota(meta.UserId, preConsumedQuota)
 	if err != nil {
 		return preConsumedQuota, openai.ErrorWrapper(err, "decrease_user_quota_failed", http.StatusInternalServerError)
 	}
@@ -86,7 +86,7 @@ func preConsumeQuota(ctx context.Context, textRequest *relaymodel.GeneralOpenAIR
 		logger.Info(ctx, fmt.Sprintf("user %d has enough quota %d, trusted and no need to pre-consume", meta.UserId, userQuota))
 	}
 	if preConsumedQuota > 0 {
-		err := model.PreConsumeTokenQuota(meta.TokenId, preConsumedQuota)
+		err := entity.PreConsumeTokenQuota(meta.TokenId, preConsumedQuota)
 		if err != nil {
 			return preConsumedQuota, openai.ErrorWrapper(err, "pre_consume_token_quota_failed", http.StatusForbidden)
 		}
@@ -114,16 +114,16 @@ func postConsumeQuota(ctx context.Context, usage *relaymodel.Usage, meta *meta.M
 		quota = 0
 	}
 	quotaDelta := quota - preConsumedQuota
-	err := model.PostConsumeTokenQuota(meta.TokenId, quotaDelta)
+	err := entity.PostConsumeTokenQuota(meta.TokenId, quotaDelta)
 	if err != nil {
 		logger.Error(ctx, "error consuming token remain quota: "+err.Error())
 	}
-	err = model.CacheUpdateUserQuota(ctx, meta.UserId)
+	err = entity.CacheUpdateUserQuota(ctx, meta.UserId)
 	if err != nil {
 		logger.Error(ctx, "error update user quota cache: "+err.Error())
 	}
 	logContent := fmt.Sprintf("倍率：%.2f × %.2f × %.2f", modelRatio, groupRatio, completionRatio)
-	model.RecordConsumeLog(ctx, &model.Log{
+	entity.RecordConsumeLog(ctx, &entity.Log{
 		UserId:            meta.UserId,
 		ChannelId:         meta.ChannelId,
 		PromptTokens:      promptTokens,
@@ -136,8 +136,8 @@ func postConsumeQuota(ctx context.Context, usage *relaymodel.Usage, meta *meta.M
 		ElapsedTime:       helper.CalcElapsedTime(meta.StartTime),
 		SystemPromptReset: systemPromptReset,
 	})
-	model.UpdateUserUsedQuotaAndRequestCount(meta.UserId, quota)
-	model.UpdateChannelUsedQuota(meta.ChannelId, quota)
+	entity.UpdateUserUsedQuotaAndRequestCount(meta.UserId, quota)
+	entity.UpdateChannelUsedQuota(meta.ChannelId, quota)
 }
 
 func getMappedModelName(modelName string, mapping map[string]string) (string, bool) {

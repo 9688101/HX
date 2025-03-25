@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/9688101/HX/common/ctxkey"
-	"github.com/9688101/HX/model"
+	"github.com/9688101/HX/internal/entity"
 	"github.com/9688101/HX/relay/channeltype"
 	"github.com/9688101/HX/relay/relaymode"
 )
@@ -25,7 +25,7 @@ type Meta struct {
 	BaseURL  string
 	APIKey   string
 	APIType  int
-	Config   model.ChannelConfig
+	Config   entity.ChannelConfig
 	IsStream bool
 	// OriginModelName is the model name from the raw user request
 	OriginModelName string
@@ -56,7 +56,7 @@ func GetByContext(c *gin.Context) *Meta {
 	}
 	cfg, ok := c.Get(ctxkey.Config)
 	if ok {
-		meta.Config = cfg.(model.ChannelConfig)
+		meta.Config = cfg.(entity.ChannelConfig)
 	}
 	if meta.BaseURL == "" {
 		meta.BaseURL = channeltype.ChannelBaseURLs[meta.ChannelType]

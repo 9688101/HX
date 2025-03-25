@@ -14,7 +14,7 @@ import (
 	"github.com/9688101/HX/common"
 	"github.com/9688101/HX/common/ctxkey"
 	"github.com/9688101/HX/common/logger"
-	"github.com/9688101/HX/model"
+	"github.com/9688101/HX/internal/entity"
 	"github.com/9688101/HX/relay"
 	"github.com/9688101/HX/relay/adaptor/openai"
 	billingratio "github.com/9688101/HX/relay/billing/ratio"
@@ -171,7 +171,7 @@ func RelayImageHelper(c *gin.Context, relayMode int) *relaymodel.ErrorWithStatus
 	modelRatio := billingratio.GetModelRatio(imageModel, meta.ChannelType)
 	groupRatio := billingratio.GetGroupRatio(meta.Group)
 	ratio := modelRatio * groupRatio
-	userQuota, err := model.CacheGetUserQuota(ctx, meta.UserId)
+	userQuota, err := entity.CacheGetUserQuota(ctx, meta.UserId)
 
 	var quota int64
 	switch meta.ChannelType {
@@ -200,18 +200,18 @@ func RelayImageHelper(c *gin.Context, relayMode int) *relaymodel.ErrorWithStatus
 			return
 		}
 
-		err := model.PostConsumeTokenQuota(meta.TokenId, quota)
+		err := entity.PostConsumeTokenQuota(meta.TokenId, quota)
 		if err != nil {
 			logger.SysError("error consuming token remain quota: " + err.Error())
 		}
-		err = model.CacheUpdateUserQuota(ctx, meta.UserId)
+		err = entity.CacheUpdateUserQuota(ctx, meta.UserId)
 		if err != nil {
 			logger.SysError("error update user quota cache: " + err.Error())
 		}
 		if quota != 0 {
 			tokenName := c.GetString(ctxkey.TokenName)
 			logContent := fmt.Sprintf("倍率：%.2f × %.2f", modelRatio, groupRatio)
-			model.RecordConsumeLog(ctx, &model.Log{
+			entity.RecordConsumeLog(ctx, &entity.Log{
 				UserId:           meta.UserId,
 				ChannelId:        meta.ChannelId,
 				PromptTokens:     0,
@@ -221,9 +221,9 @@ func RelayImageHelper(c *gin.Context, relayMode int) *relaymodel.ErrorWithStatus
 				Quota:            int(quota),
 				Content:          logContent,
 			})
-			model.UpdateUserUsedQuotaAndRequestCount(meta.UserId, quota)
+			entity.UpdateUserUsedQuotaAndRequestCount(meta.UserId, quota)
 			channelId := c.GetInt(ctxkey.ChannelId)
-			model.UpdateChannelUsedQuota(channelId, quota)
+			entity.UpdateChannelUsedQuota(channelId, quota)
 		}
 	}(c.Request.Context())
 

@@ -16,7 +16,7 @@ import (
 	"github.com/9688101/HX/common/config"
 	"github.com/9688101/HX/common/ctxkey"
 	"github.com/9688101/HX/common/logger"
-	"github.com/9688101/HX/model"
+	"github.com/9688101/HX/internal/entity"
 	"github.com/9688101/HX/relay/adaptor/openai"
 	"github.com/9688101/HX/relay/billing"
 	billingratio "github.com/9688101/HX/relay/billing/ratio"
@@ -66,7 +66,7 @@ func RelayAudioHelper(c *gin.Context, relayMode int) *relaymodel.ErrorWithStatus
 	default:
 		preConsumedQuota = int64(float64(config.PreConsumedQuota) * ratio)
 	}
-	userQuota, err := model.CacheGetUserQuota(ctx, userId)
+	userQuota, err := entity.CacheGetUserQuota(ctx, userId)
 	if err != nil {
 		return openai.ErrorWrapper(err, "get_user_quota_failed", http.StatusInternalServerError)
 	}
@@ -75,7 +75,7 @@ func RelayAudioHelper(c *gin.Context, relayMode int) *relaymodel.ErrorWithStatus
 	if userQuota-preConsumedQuota < 0 {
 		return openai.ErrorWrapper(errors.New("user quota is not enough"), "insufficient_user_quota", http.StatusForbidden)
 	}
-	err = model.CacheDecreaseUserQuota(userId, preConsumedQuota)
+	err = entity.CacheDecreaseUserQuota(userId, preConsumedQuota)
 	if err != nil {
 		return openai.ErrorWrapper(err, "decrease_user_quota_failed", http.StatusInternalServerError)
 	}
@@ -85,7 +85,7 @@ func RelayAudioHelper(c *gin.Context, relayMode int) *relaymodel.ErrorWithStatus
 		preConsumedQuota = 0
 	}
 	if preConsumedQuota > 0 {
-		err := model.PreConsumeTokenQuota(tokenId, preConsumedQuota)
+		err := entity.PreConsumeTokenQuota(tokenId, preConsumedQuota)
 		if err != nil {
 			return openai.ErrorWrapper(err, "pre_consume_token_quota_failed", http.StatusForbidden)
 		}
@@ -100,7 +100,7 @@ func RelayAudioHelper(c *gin.Context, relayMode int) *relaymodel.ErrorWithStatus
 			defer func(ctx context.Context) {
 				go func() {
 					// negative means add quota back for token & user
-					err := model.PostConsumeTokenQuota(tokenId, -preConsumedQuota)
+					err := entity.PostConsumeTokenQuota(tokenId, -preConsumedQuota)
 					if err != nil {
 						logger.Error(ctx, fmt.Sprintf("error rollback pre-consumed quota: %s", err.Error()))
 					}
