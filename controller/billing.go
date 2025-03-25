@@ -1,11 +1,11 @@
 package controller
 
 import (
+	"github.com/9688101/HX/common/config"
+	"github.com/9688101/HX/common/ctxkey"
+	"github.com/9688101/HX/model"
+	relaymodel "github.com/9688101/HX/relay/model"
 	"github.com/gin-gonic/gin"
-	"github.com/songquanpeng/one-api/common/config"
-	"github.com/songquanpeng/one-api/common/ctxkey"
-	"github.com/songquanpeng/one-api/model"
-	relaymodel "github.com/songquanpeng/one-api/relay/model"
 )
 
 func GetSubscription(c *gin.Context) {

@@ -3,12 +3,13 @@ package router
 import (
 	"embed"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/songquanpeng/one-api/common/config"
-	"github.com/songquanpeng/one-api/common/logger"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/9688101/HX/common/config"
+	"github.com/9688101/HX/common/logger"
+	"github.com/gin-gonic/gin"
 )
 
 func SetRouter(router *gin.Engine, buildFS embed.FS) {

@@ -3,13 +3,13 @@ package vertexai
 import (
 	"net/http"
 
+	"github.com/9688101/HX/common/ctxkey"
+	"github.com/9688101/HX/relay/adaptor/anthropic"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"github.com/songquanpeng/one-api/common/ctxkey"
-	"github.com/songquanpeng/one-api/relay/adaptor/anthropic"
 
-	"github.com/songquanpeng/one-api/relay/meta"
-	"github.com/songquanpeng/one-api/relay/model"
+	"github.com/9688101/HX/relay/meta"
+	"github.com/9688101/HX/relay/model"
 )
 
 var ModelList = []string{

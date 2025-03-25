@@ -2,17 +2,18 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/songquanpeng/one-api/common/ctxkey"
-	"github.com/songquanpeng/one-api/model"
-	relay "github.com/songquanpeng/one-api/relay"
-	"github.com/songquanpeng/one-api/relay/adaptor/openai"
-	"github.com/songquanpeng/one-api/relay/apitype"
-	"github.com/songquanpeng/one-api/relay/channeltype"
-	"github.com/songquanpeng/one-api/relay/meta"
-	relaymodel "github.com/songquanpeng/one-api/relay/model"
 	"net/http"
 	"strings"
+
+	"github.com/9688101/HX/common/ctxkey"
+	"github.com/9688101/HX/model"
+	relay "github.com/9688101/HX/relay"
+	"github.com/9688101/HX/relay/adaptor/openai"
+	"github.com/9688101/HX/relay/apitype"
+	"github.com/9688101/HX/relay/channeltype"
+	"github.com/9688101/HX/relay/meta"
+	relaymodel "github.com/9688101/HX/relay/model"
+	"github.com/gin-gonic/gin"
 )
 
 // https://platform.openai.com/docs/api-reference/models/list

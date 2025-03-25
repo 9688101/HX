@@ -3,19 +3,20 @@ package model
 import (
 	"database/sql"
 	"fmt"
-	"github.com/songquanpeng/one-api/common"
-	"github.com/songquanpeng/one-api/common/config"
-	"github.com/songquanpeng/one-api/common/env"
-	"github.com/songquanpeng/one-api/common/helper"
-	"github.com/songquanpeng/one-api/common/logger"
-	"github.com/songquanpeng/one-api/common/random"
+	"os"
+	"strings"
+	"time"
+
+	"github.com/9688101/HX/common"
+	"github.com/9688101/HX/common/config"
+	"github.com/9688101/HX/common/env"
+	"github.com/9688101/HX/common/helper"
+	"github.com/9688101/HX/common/logger"
+	"github.com/9688101/HX/common/random"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"os"
-	"strings"
-	"time"
 )
 
 var DB *gorm.DB

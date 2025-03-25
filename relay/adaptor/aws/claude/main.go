@@ -8,20 +8,20 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/9688101/HX/common"
+	"github.com/9688101/HX/common/ctxkey"
+	"github.com/9688101/HX/common/helper"
+	"github.com/9688101/HX/common/logger"
+	"github.com/9688101/HX/relay/adaptor/anthropic"
+	"github.com/9688101/HX/relay/adaptor/aws/utils"
+	"github.com/9688101/HX/relay/adaptor/openai"
+	relaymodel "github.com/9688101/HX/relay/model"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
-	"github.com/songquanpeng/one-api/common"
-	"github.com/songquanpeng/one-api/common/ctxkey"
-	"github.com/songquanpeng/one-api/common/helper"
-	"github.com/songquanpeng/one-api/common/logger"
-	"github.com/songquanpeng/one-api/relay/adaptor/anthropic"
-	"github.com/songquanpeng/one-api/relay/adaptor/aws/utils"
-	"github.com/songquanpeng/one-api/relay/adaptor/openai"
-	relaymodel "github.com/songquanpeng/one-api/relay/model"
 )
 
 // https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html

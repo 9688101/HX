@@ -1,10 +1,11 @@
 package model
 
 import (
-	"github.com/songquanpeng/one-api/common/config"
-	"github.com/songquanpeng/one-api/common/logger"
 	"sync"
 	"time"
+
+	"github.com/9688101/HX/common/config"
+	"github.com/9688101/HX/common/logger"
 )
 
 const (

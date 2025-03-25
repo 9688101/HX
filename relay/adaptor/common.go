@@ -3,11 +3,12 @@ package adaptor
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/songquanpeng/one-api/common/client"
-	"github.com/songquanpeng/one-api/relay/meta"
 	"io"
 	"net/http"
+
+	"github.com/9688101/HX/common/client"
+	"github.com/9688101/HX/relay/meta"
+	"github.com/gin-gonic/gin"
 )
 
 func SetupCommonRequestHeader(c *gin.Context, req *http.Request, meta *meta.Meta) {

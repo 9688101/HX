@@ -2,9 +2,10 @@ package validator
 
 import (
 	"errors"
-	"github.com/songquanpeng/one-api/relay/model"
-	"github.com/songquanpeng/one-api/relay/relaymode"
 	"math"
+
+	"github.com/9688101/HX/relay/model"
+	"github.com/9688101/HX/relay/relaymode"
 )
 
 func ValidateTextRequest(textRequest *model.GeneralOpenAIRequest, relayMode int) error {

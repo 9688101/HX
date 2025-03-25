@@ -10,12 +10,12 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 
-	"github.com/songquanpeng/one-api/common"
-	"github.com/songquanpeng/one-api/common/config"
-	"github.com/songquanpeng/one-api/common/ctxkey"
-	"github.com/songquanpeng/one-api/common/i18n"
-	"github.com/songquanpeng/one-api/common/random"
-	"github.com/songquanpeng/one-api/model"
+	"github.com/9688101/HX/common"
+	"github.com/9688101/HX/common/config"
+	"github.com/9688101/HX/common/ctxkey"
+	"github.com/9688101/HX/common/i18n"
+	"github.com/9688101/HX/common/random"
+	"github.com/9688101/HX/model"
 )
 
 type LoginRequest struct {

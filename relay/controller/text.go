@@ -9,17 +9,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/songquanpeng/one-api/common/config"
-	"github.com/songquanpeng/one-api/common/logger"
-	"github.com/songquanpeng/one-api/relay"
-	"github.com/songquanpeng/one-api/relay/adaptor"
-	"github.com/songquanpeng/one-api/relay/adaptor/openai"
-	"github.com/songquanpeng/one-api/relay/apitype"
-	"github.com/songquanpeng/one-api/relay/billing"
-	billingratio "github.com/songquanpeng/one-api/relay/billing/ratio"
-	"github.com/songquanpeng/one-api/relay/channeltype"
-	"github.com/songquanpeng/one-api/relay/meta"
-	"github.com/songquanpeng/one-api/relay/model"
+	"github.com/9688101/HX/common/config"
+	"github.com/9688101/HX/common/logger"
+	"github.com/9688101/HX/relay"
+	"github.com/9688101/HX/relay/adaptor"
+	"github.com/9688101/HX/relay/adaptor/openai"
+	"github.com/9688101/HX/relay/apitype"
+	"github.com/9688101/HX/relay/billing"
+	billingratio "github.com/9688101/HX/relay/billing/ratio"
+	"github.com/9688101/HX/relay/channeltype"
+	"github.com/9688101/HX/relay/meta"
+	"github.com/9688101/HX/relay/model"
 )
 
 func RelayTextHelper(c *gin.Context) *model.ErrorWithStatusCode {

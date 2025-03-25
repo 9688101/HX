@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/songquanpeng/one-api/common/config"
-	"github.com/songquanpeng/one-api/relay/model"
+	"github.com/9688101/HX/common/config"
+	"github.com/9688101/HX/relay/model"
 )
 
 func ShouldDisableChannel(err *model.Error, statusCode int) bool {

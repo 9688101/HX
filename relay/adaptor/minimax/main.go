@@ -2,8 +2,9 @@ package minimax
 
 import (
 	"fmt"
-	"github.com/songquanpeng/one-api/relay/meta"
-	"github.com/songquanpeng/one-api/relay/relaymode"
+
+	"github.com/9688101/HX/relay/meta"
+	"github.com/9688101/HX/relay/relaymode"
 )
 
 func GetRequestURL(meta *meta.Meta) (string, error) {

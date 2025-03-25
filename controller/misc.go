@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/songquanpeng/one-api/common"
-	"github.com/songquanpeng/one-api/common/config"
-	"github.com/songquanpeng/one-api/common/i18n"
-	"github.com/songquanpeng/one-api/common/message"
-	"github.com/songquanpeng/one-api/model"
+	"github.com/9688101/HX/common"
+	"github.com/9688101/HX/common/config"
+	"github.com/9688101/HX/common/i18n"
+	"github.com/9688101/HX/common/message"
+	"github.com/9688101/HX/model"
 
 	"github.com/gin-gonic/gin"
 )

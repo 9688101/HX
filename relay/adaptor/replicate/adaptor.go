@@ -8,14 +8,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/9688101/HX/common/logger"
+	"github.com/9688101/HX/relay/adaptor"
+	"github.com/9688101/HX/relay/adaptor/openai"
+	"github.com/9688101/HX/relay/meta"
+	"github.com/9688101/HX/relay/model"
+	"github.com/9688101/HX/relay/relaymode"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"github.com/songquanpeng/one-api/common/logger"
-	"github.com/songquanpeng/one-api/relay/adaptor"
-	"github.com/songquanpeng/one-api/relay/adaptor/openai"
-	"github.com/songquanpeng/one-api/relay/meta"
-	"github.com/songquanpeng/one-api/relay/model"
-	"github.com/songquanpeng/one-api/relay/relaymode"
 )
 
 type Adaptor struct {

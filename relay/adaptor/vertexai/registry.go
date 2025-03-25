@@ -3,11 +3,11 @@ package vertexai
 import (
 	"net/http"
 
+	claude "github.com/9688101/HX/relay/adaptor/vertexai/claude"
+	gemini "github.com/9688101/HX/relay/adaptor/vertexai/gemini"
+	"github.com/9688101/HX/relay/meta"
+	"github.com/9688101/HX/relay/model"
 	"github.com/gin-gonic/gin"
-	claude "github.com/songquanpeng/one-api/relay/adaptor/vertexai/claude"
-	gemini "github.com/songquanpeng/one-api/relay/adaptor/vertexai/gemini"
-	"github.com/songquanpeng/one-api/relay/meta"
-	"github.com/songquanpeng/one-api/relay/model"
 )
 
 type VertexAIModelType int
