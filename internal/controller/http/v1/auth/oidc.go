@@ -14,7 +14,6 @@ import (
 
 	"github.com/9688101/HX/common/config"
 	"github.com/9688101/HX/common/logger"
-	"github.com/9688101/HX/internal/controller/http/v1"
 	v1 "github.com/9688101/HX/internal/controller/http/v1"
 	"github.com/9688101/HX/internal/entity"
 )

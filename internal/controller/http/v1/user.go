@@ -18,10 +18,10 @@ import (
 	"github.com/9688101/HX/internal/entity"
 )
 
-type LoginRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
+// type LoginRequest struct {
+// 	Username string `json:"username"`
+// 	Password string `json:"password"`
+// }
 
 func Login(c *gin.Context) {
 	if !config.PasswordLoginEnabled {
