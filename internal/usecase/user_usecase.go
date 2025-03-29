@@ -4,60 +4,58 @@ import (
 	"context"
 	"errors"
 
-	"github.com/9688101/HX/common"
 	"github.com/9688101/HX/internal/entity"
 	"github.com/9688101/HX/internal/repo"
+	"github.com/9688101/HX/pkg"
+	"github.com/9688101/HX/pkg/config"
 )
 
-// type UserUseCase interface {
-// 	// RegisterUser(ctx context.Context, user *entity.User) error
-// 	// GetUser(ctx context.Context, id int) (*entity.User, error)
-// }
+type UserUseCase interface {
+	RegisterUser(ctx context.Context, req RegisterUserRequest) error
+}
 
-type UserUseCase struct {
-	userRepo *repo.UserRepo
+type userUseCase struct {
+	repo repo.UserRepository
 }
 
 // NewUserUseCase 返回 UserUseCase 的实现
-func NewUserUseCase(r *repo.UserRepo) *UserUseCase {
-	return &UserUseCase{
-		userRepo: r,
+func NewUserUseCase(r repo.UserRepository) *userUseCase {
+	return &userUseCase{
+		repo: r,
 	}
 }
-
-func (uu *UserUseCase) Register(ctx context.Context, u *entity.User) error {
-	affCode := u.AffCode // this code is the inviter's code, not the user's own code
-	inviterId, _ := uu.userRepo.GetUserIdByAffCode(affCode)
-	// cleanUser := entity.User{
-	// 	Username:    u.Username,
-	// 	Password:    u.Password,
-	// 	DisplayName: u.Username,
-	// 	InviterId:   inviterId,
-	// }
-	u.InviterId = inviterId
-
-	return uu.userRepo.Insert(ctx, u)
-}
-
-// ValidateAndFill check password & user status
-func (uu *UserUseCase) ValidateAndFill(u *entity.User) (err error) {
-	// When querying with struct, GORM will only query with non-zero fields,
-	// that means if your field’s value is 0, '', false or other zero values,
-	// it won’t be used to build query conditions
-	password := u.Password
-	if u.Username == "" || password == "" {
-		return errors.New("用户名或密码为空")
-	}
-	err = uu.userRepo.ValidateByName(u)
-	if err != nil {
-		err = uu.userRepo.ValidateByEmail(u)
-		if err != nil {
-			return errors.New("用户名或密码错误，或用户已被封禁")
+func (uc *userUseCase) RegisterUser(ctx context.Context, req RegisterUserRequest) error {
+	// 如果开启邮箱验证，则校验邮箱和验证码
+	if config.EmailVerificationEnabled {
+		if req.Email == "" || req.VerificationCode == "" {
+			return errors.New("管理员开启了邮箱验证，请输入邮箱地址和验证码")
+		}
+		if !pkg.VerifyCodeWithKey(req.Email, req.VerificationCode, pkg.EmailVerificationPurpose) {
+			return errors.New("验证码错误或已过期")
 		}
 	}
-	okay := common.ValidatePasswordAndHash(password, u.Password)
-	if !okay || u.Status != entity.UserStatusEnabled {
-		return errors.New("用户名或密码错误，或用户已被封禁")
+
+	// 根据邀请码获取邀请人ID（邀请码可能为空，返回0表示无邀请人）
+	inviterId, _ := uc.repo.GetUserIdByAffCode(req.AffCode)
+
+	// 如果 DisplayName 为空，则使用 Username
+	displayName := req.Username
+
+	// 构造待注册的用户对象（这里暂不对密码做处理，后续加密）
+	newUser := entity.User{
+		Username:    req.Username,
+		Password:    req.Password,
+		DisplayName: displayName,
+		InviterId:   inviterId,
+	}
+	// 如果开启邮箱验证，则设置邮箱
+	if config.EmailVerificationEnabled {
+		newUser.Email = req.Email
+	}
+
+	// 调用 Repository 层插入用户记录
+	if err := uc.repo.InsertUser(ctx, &newUser, inviterId); err != nil {
+		return err
 	}
 	return nil
 }

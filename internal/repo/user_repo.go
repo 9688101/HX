@@ -2,100 +2,35 @@ package repo
 
 import (
 	"context"
-	"errors"
-	"fmt"
 
-	"github.com/9688101/HX/common"
-	"github.com/9688101/HX/common/config"
-	"github.com/9688101/HX/common/logger"
-	"github.com/9688101/HX/common/random"
 	"github.com/9688101/HX/internal/entity"
+	"github.com/9688101/HX/pkg"
 	"gorm.io/gorm"
 )
 
-// type UserRepo interface {
-//     // CreateUser(ctx context.Context, user *entity.User) error
-//     // GetUserByID(ctx context.Context, id int) (*entity.User, error)
-// }
+type UserRepository interface {
+	InsertUser(ctx context.Context, user *entity.User, inviterId int) error
+	GetUserIdByAffCode(affCode string) (int, error)
+}
 
-type UserRepo struct {
-	DB *gorm.DB
+type userRepo struct {
+	db *gorm.DB
 }
 
 // NewUserRepo 返回 UserRepo 的实现
-func NewUserRepo() *UserRepo {
-	return &UserRepo{}
+func NewUserRepo(db *gorm.DB) *userRepo {
+	return &userRepo{db: db}
 }
 
-func (uu *UserRepo) GetUserIdByAffCode(affCode string) (int, error) {
-	if affCode == "" {
-		return 0, errors.New("affCode 为空！")
+func (r *userRepo) InsertUser(ctx context.Context, user *entity.User, inviterId int) error {
+	// 此处可以进行密码加密（如果尚未加密），例如：
+	hashedPwd, err := pkg.Password2Hash(user.Password)
+	if err != nil {
+		return err
 	}
-	u := entity.NewUser()
-	err := uu.DB.Select("id").First(u, "aff_code = ?", affCode).Error
-	return u.Id, err
-}
+	user.Password = hashedPwd
 
-func (uu *UserRepo) Insert(ctx context.Context, u *entity.User) error {
-	var err error
-	if u.Password != "" {
-		u.Password, err = common.Password2Hash(u.Password)
-		if err != nil {
-			return err
-		}
-	}
-	u.Quota = config.QuotaForNewUser
-	u.AccessToken = random.GetUUID()
-	u.AffCode = random.GetRandomString(4)
-	result := uu.DB.Create(u)
-	if result.Error != nil {
-		return result.Error
-	}
-	// if config.QuotaForNewUser > 0 {
-	// 	RecordLog(ctx, user.Id, LogTypeSystem, fmt.Sprintf("新用户注册赠送 %s", common.LogQuota(config.QuotaForNewUser)))
-	// }
-	// if inviterId != 0 {
-	// 	if config.QuotaForInvitee > 0 {
-	// 		_ = IncreaseUserQuota(user.Id, config.QuotaForInvitee)
-	// 		RecordLog(ctx, user.Id, LogTypeSystem, fmt.Sprintf("使用邀请码赠送 %s", common.LogQuota(config.QuotaForInvitee)))
-	// 	}
-	// 	if config.QuotaForInviter > 0 {
-	// 		_ = IncreaseUserQuota(inviterId, config.QuotaForInviter)
-	// 		RecordLog(ctx, inviterId, LogTypeSystem, fmt.Sprintf("邀请用户赠送 %s", common.LogQuota(config.QuotaForInviter)))
-	// 	}
-	// }
-	// create default token
-	// cleanToken := entity.Token{
-	// 	UserId:         u.Id,
-	// 	Name:           "default",
-	// 	Key:            random.GenerateKey(),
-	// 	CreatedTime:    helper.GetTimestamp(),
-	// 	AccessedTime:   helper.GetTimestamp(),
-	// 	ExpiredTime:    -1,
-	// 	RemainQuota:    -1,
-	// 	UnlimitedQuota: true,
-	// }
-	result.Error = tr.Insert(u.Id)
-	if result.Error != nil {
-		// do not block
-		logger.SysError(fmt.Sprintf("create default token for user %d failed: %s", u.Id, result.Error.Error()))
-	}
-	return nil
-}
+	// 其他默认值设置、日志记录等也可在此处执行
 
-func (uu *UserRepo) ValidateAndFill() error {
-
-	return nil
-}
-
-// ValidateAndFill check password & user status
-func (uu *UserRepo) ValidateByName(u *entity.User) error {
-	return uu.DB.Where("username = ?", u.Username).First(u).Error
-}
-
-// we must make sure check username firstly
-// consider this case: a malicious user set his username as other's email
-func (uu *UserRepo) ValidateByEmail(u *entity.User) error {
-	return uu.DB.Where("email = ?", u.Username).First(u).Error
-
+	return r.db.WithContext(ctx).Create(user).Error
 }

@@ -1,0 +1,102 @@
+system_name: "One API"
+server_address: "http://localhost:3000"
+footer: ""
+logo: ""
+top_up_link: ""
+chat_link: ""
+quota_per_unit: 500000.0
+display_in_currency_enabled: true
+display_token_stat_enabled: true
+
+session_secret: "your-session-secret-here"
+
+password_login_enabled: true
+password_register_enabled: true
+email_verification_enabled: false
+github_oauth_enabled: false
+oidc_enabled: false
+wechat_auth_enabled: false
+turnstile_check_enabled: false
+register_enabled: true
+email_domain_restriction_enabled: false
+email_domain_whitelist:
+  - "gmail.com"
+  - "163.com"
+  - "126.com"
+  - "qq.com"
+  - "outlook.com"
+  - "hotmail.com"
+  - "icloud.com"
+  - "yahoo.com"
+  - "foxmail.com"
+
+debug_enabled: false
+debug_sql_enabled: false
+memory_cache_enabled: false
+
+smtp_server: ""
+smtp_port: 587
+smtp_account: ""
+smtp_from: ""
+smtp_token: ""
+
+github_client_id: ""
+github_client_secret: ""
+lark_client_id: ""
+lark_client_secret: ""
+oidc_client_id: ""
+oidc_client_secret: ""
+oidc_well_known: ""
+oidc_authorization_endpoint: ""
+oidc_token_endpoint: ""
+oidc_userinfo_endpoint: ""
+
+wechat_server_address: ""
+wechat_server_token: ""
+wechat_account_qr_code_image_url: ""
+
+message_pusher_address: ""
+message_pusher_token: ""
+
+turnstile_site_key: ""
+turnstile_secret_key: ""
+
+quota_for_new_user: 0
+quota_for_inviter: 0
+quota_for_invitee: 0
+quota_remind_threshold: 1000
+pre_consumed_quota: 500
+
+sync_frequency: 600
+
+global_api_rate_limit_num: 480
+global_api_rate_limit_duration: 180
+global_web_rate_limit_num: 240
+global_web_rate_limit_duration: 180
+upload_rate_limit_num: 10
+upload_rate_limit_duration: 60
+download_rate_limit_num: 10
+download_rate_limit_duration: 60
+critical_rate_limit_num: 20
+critical_rate_limit_duration: 1200
+rate_limit_key_expiration_duration: 20m
+
+enable_metric: false
+metric_queue_size: 10
+metric_success_rate_threshold: 0.8
+metric_success_chan_size: 1024
+metric_fail_chan_size: 128
+
+relay_timeout: 0
+relay_proxy: ""
+user_content_request_proxy: ""
+user_content_request_timeout: 30
+
+initial_root_token: ""
+initial_root_access_token: ""
+gemini_version: "v1"
+only_one_log_file: false
+root_user_email: ""
+is_master_node: true
+
+test_prompt: "Output only your specific model name with no additional text."
