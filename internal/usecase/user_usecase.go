@@ -12,6 +12,13 @@ import (
 
 type UserUseCase interface {
 	RegisterUser(ctx context.Context, req RegisterUserRequest) error
+	Login(ctx context.Context, username, password string) (*entity.User, error)
+	// GetUserList 获取分页用户列表
+	GetUserList(ctx context.Context, offset, limit int, order string) ([]*entity.User, error)
+	// SearchUsers 根据关键词搜索用户
+	SearchUsers(ctx context.Context, keyword string) ([]*entity.User, error)
+	// GetUser 获取单个用户信息，并根据调用者角色过滤同级或更高级别用户
+	GetUser(ctx context.Context, id int, callerRole int) (*entity.User, error)
 }
 
 type userUseCase struct {
@@ -19,11 +26,12 @@ type userUseCase struct {
 }
 
 // NewUserUseCase 返回 UserUseCase 的实现
-func NewUserUseCase(r repo.UserRepository) *userUseCase {
+func NewUserUseCase(r repo.UserRepository) UserUseCase {
 	return &userUseCase{
 		repo: r,
 	}
 }
+
 func (uc *userUseCase) RegisterUser(ctx context.Context, req RegisterUserRequest) error {
 	// 如果开启邮箱验证，则校验邮箱和验证码
 	if config.EmailVerificationEnabled {
@@ -58,4 +66,44 @@ func (uc *userUseCase) RegisterUser(ctx context.Context, req RegisterUserRequest
 		return err
 	}
 	return nil
+}
+
+func (uc *userUseCase) Login(ctx context.Context, username, password string) (*entity.User, error) {
+	// 从 Repo 层查询用户记录（假设按用户名唯一查询）
+	user, err := uc.repo.GetUserByUsername(ctx, username)
+	if err != nil {
+		return nil, errors.New("用户名或密码错误")
+	}
+
+	// 使用 common 包中的方法验证密码（假设 user.Password 为加密后密码）
+	if !pkg.ValidatePasswordAndHash(password, user.Password) {
+		return nil, errors.New("用户名或密码错误")
+	}
+
+	// 检查用户状态
+	if user.Status != entity.UserStatusEnabled {
+		return nil, errors.New("用户已被封禁")
+	}
+
+	return user, nil
+}
+
+func (uc *userUseCase) GetUserList(ctx context.Context, offset, limit int, order string) ([]*entity.User, error) {
+	return uc.repo.GetAllUsers(ctx, offset, limit, order)
+}
+
+func (uc *userUseCase) SearchUsers(ctx context.Context, keyword string) ([]*entity.User, error) {
+	return uc.repo.SearchUsers(ctx, keyword)
+}
+
+func (uc *userUseCase) GetUser(ctx context.Context, id int, callerRole int) (*entity.User, error) {
+	user, err := uc.repo.GetUserByID(ctx, id, false)
+	if err != nil {
+		return nil, err
+	}
+	// 权限校验：调用者的角色必须大于目标用户的角色，除非调用者为超级管理员
+	if callerRole <= user.Role && callerRole != entity.RoleRootUser {
+		return nil, errors.New("无权获取同级或更高权限等级用户的信息")
+	}
+	return user, nil
 }

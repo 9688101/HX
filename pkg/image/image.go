@@ -12,7 +12,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/9688101/HX/common/client"
+	"github.com/9688101/HX/pkg/client"
 
 	_ "golang.org/x/image/webp"
 )
