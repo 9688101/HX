@@ -8,10 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter() *gin.Engine {
+func SetupUserRouter() *gin.Engine {
 	r := gin.Default()
 
-	userRepo := repo.NewUserRepository(db.DB)
+	userRepo := repo.NewUserRepository(db.GetDB())
 	userUseCase := usecase.NewUserUseCase(userRepo)
 	userController := v1.NewUserController(userUseCase)
 
@@ -19,9 +19,18 @@ func SetupRouter() *gin.Engine {
 	r.POST("/register", userController.RegisterUserHandler)
 	r.POST("/login", userController.LoginHandler)
 	r.POST("/logout", userController.LogoutHandler)
-	r.GET("/users", userController.GetAllUsersHandler)
+	r.GET("/users", userController.GetUserListHandler)
 	r.GET("/users/search", userController.SearchUsersHandler)
 	r.GET("/user/:id", userController.GetUserHandler)
+	r.PUT("/user/self", userController.UpdateSelfHandler)
+	r.GET("/user/self", userController.GetSelfHandler)
+	r.DELETE("/user/self", userController.DeleteSelfHandler)
+	r.PUT("/user/:id", userController.UpdateUserHandler)
+	r.DELETE("/user/:id", userController.DeleteUserHandler)
+	r.POST("/user/bind-email", userController.EmailBindHandler)
+	r.POST("/user/manage", userController.ManageUserHandler)
+	r.GET("/user/aff-code", userController.GetAffCodeHandler)
+	r.POST("/user/generate-access-token", userController.GenerateAccessTokenHandler)
 
 	return r
 }

@@ -14,31 +14,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type UserController struct {
-	usecase usecase.UserUseCase
-}
-
-// 创建 UserController 实例
-func NewUserController(uc usecase.UserUseCase) *UserController {
-	return &UserController{
-		usecase: uc,
-	}
-}
-
 // RegisterUserHandler 处理用户注册请求
 func (uc *UserController) RegisterUserHandler(c *gin.Context) {
 	// 检查系统配置是否允许注册
 	if !config.RegisterEnabled {
 		c.JSON(http.StatusOK, BaseResponse{
-			success: false,
-			message: "管理员关闭了新用户注册",
+			Success: false,
+			Message: "管理员关闭了新用户注册",
 		})
 		return
 	}
 	if !config.PasswordRegisterEnabled {
 		c.JSON(http.StatusOK, BaseResponse{
-			success: false,
-			message: "管理员关闭了通过密码进行注册，请使用第三方账户验证的形式进行注册",
+			Success: false,
+			Message: "管理员关闭了通过密码进行注册，请使用第三方账户验证的形式进行注册",
 		})
 		return
 	}
@@ -47,8 +36,8 @@ func (uc *UserController) RegisterUserHandler(c *gin.Context) {
 	var req usecase.RegisterUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, BaseResponse{
-			success: false,
-			message: i18n.Translate(c, "invalid_parameter"),
+			Success: false,
+			Message: i18n.Translate(c, "invalid_parameter"),
 		})
 		return
 	}
@@ -56,8 +45,8 @@ func (uc *UserController) RegisterUserHandler(c *gin.Context) {
 	// 进行输入验证
 	if err := pkg.Validate.Struct(&req); err != nil {
 		c.JSON(http.StatusOK, BaseResponse{
-			success: false,
-			message: i18n.Translate(c, "invalid_input"),
+			Success: false,
+			Message: i18n.Translate(c, "invalid_input"),
 		})
 		return
 	}
@@ -65,15 +54,15 @@ func (uc *UserController) RegisterUserHandler(c *gin.Context) {
 	// 调用 UseCase 层处理注册逻辑
 	if err := uc.usecase.RegisterUser(c.Request.Context(), req); err != nil {
 		c.JSON(http.StatusOK, BaseResponse{
-			success: false,
-			message: err.Error(),
+			Success: false,
+			Message: err.Error(),
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, BaseResponse{
-		success: true,
-		message: "",
+		Success: true,
+		Message: "",
 	})
 }
 
@@ -81,8 +70,8 @@ func (uc *UserController) RegisterUserHandler(c *gin.Context) {
 func (uc *UserController) LoginHandler(c *gin.Context) {
 	if !config.PasswordLoginEnabled {
 		c.JSON(http.StatusOK, BaseResponse{
-			message: "管理员关闭了密码登录",
-			success: false,
+			Message: "管理员关闭了密码登录",
+			Success: false,
 		})
 		return
 	}
@@ -90,8 +79,8 @@ func (uc *UserController) LoginHandler(c *gin.Context) {
 	var req usecase.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, BaseResponse{
-			message: i18n.Translate(c, "invalid_parameter"),
-			success: false,
+			Message: i18n.Translate(c, "invalid_parameter"),
+			Success: false,
 		})
 		return
 	}
@@ -99,8 +88,8 @@ func (uc *UserController) LoginHandler(c *gin.Context) {
 	// 校验参数非空（binding 已确保必填，但可以额外检查）
 	if req.Username == "" || req.Password == "" {
 		c.JSON(http.StatusOK, BaseResponse{
-			message: i18n.Translate(c, "invalid_parameter"),
-			success: false,
+			Message: i18n.Translate(c, "invalid_parameter"),
+			Success: false,
 		})
 		return
 	}
@@ -109,8 +98,8 @@ func (uc *UserController) LoginHandler(c *gin.Context) {
 	user, err := uc.usecase.Login(c.Request.Context(), req.Username, req.Password)
 	if err != nil {
 		c.JSON(http.StatusOK, BaseResponse{
-			message: err.Error(),
-			success: false,
+			Message: err.Error(),
+			Success: false,
 		})
 		return
 	}
@@ -128,8 +117,8 @@ func setupLogin(user *entity.User, c *gin.Context) {
 	session.Set("status", user.Status)
 	if err := session.Save(); err != nil {
 		c.JSON(http.StatusOK, BaseResponse{
-			message: "无法保存会话信息，请重试",
-			success: false,
+			Message: "无法保存会话信息，请重试",
+			Success: false,
 		})
 		return
 	}
@@ -148,15 +137,16 @@ func setupLogin(user *entity.User, c *gin.Context) {
 		Role:        user.Role,
 		Status:      user.Status,
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "",
-		"success": true,
-		"data":    cleanUser,
+	c.JSON(http.StatusOK, Response{
+		BaseResponse: BaseResponse{
+			Message: "",
+			Success: true,
+		},
+		Data: cleanUser,
 	})
 }
 
-// LogoutHandler 处理用户注销请求，清除 session
+// // LogoutHandler 处理用户注销请求，清除 session
 func (uc *UserController) LogoutHandler(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Clear()
@@ -173,8 +163,8 @@ func (uc *UserController) LogoutHandler(c *gin.Context) {
 	})
 }
 
-// GetAllUsersHandler 处理获取用户列表请求
-func (uc *UserController) GetAllUsersHandler(c *gin.Context) {
+// // GetAllUsersHandler 处理获取用户列表请求
+func (uc *UserController) GetUserListHandler(c *gin.Context) {
 	p, _ := strconv.Atoi(c.Query("p"))
 	if p < 0 {
 		p = 0
@@ -198,7 +188,7 @@ func (uc *UserController) GetAllUsersHandler(c *gin.Context) {
 	})
 }
 
-// SearchUsersHandler 处理用户搜索请求
+// // SearchUsersHandler 处理用户搜索请求
 func (uc *UserController) SearchUsersHandler(c *gin.Context) {
 	keyword := c.Query("keyword")
 	users, err := uc.usecase.SearchUsers(c.Request.Context(), keyword)
@@ -216,7 +206,7 @@ func (uc *UserController) SearchUsersHandler(c *gin.Context) {
 	})
 }
 
-// GetUserHandler 处理根据 ID 获取单个用户信息的请求
+// // GetUserHandler 处理根据 ID 获取单个用户信息的请求
 func (uc *UserController) GetUserHandler(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -239,5 +229,278 @@ func (uc *UserController) GetUserHandler(c *gin.Context) {
 		"success": true,
 		"message": "",
 		"data":    user,
+	})
+}
+
+// // UpdateSelfHandler 处理当前用户更新自己信息的请求
+func (uc *UserController) UpdateSelfHandler(c *gin.Context) {
+	var req usecase.UpdateSelfRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": i18n.Translate(c, "invalid_parameter"),
+		})
+		return
+	}
+
+	// 获取当前用户 ID，从上下文中（例如 ctxkey.Id）
+	userID := c.GetInt(ctxkey.Id)
+	if userID == 0 {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "无法获取当前用户信息",
+		})
+		return
+	}
+
+	if err := uc.usecase.UpdateSelf(c.Request.Context(), req, userID); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+	})
+}
+
+// // GetSelfHandler 处理获取当前用户信息的请求
+func (uc *UserController) GetSelfHandler(c *gin.Context) {
+	userID := c.GetInt(ctxkey.Id)
+	if userID == 0 {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "无法获取当前用户信息",
+		})
+		return
+	}
+
+	user, err := uc.usecase.GetSelf(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+		"data":    user,
+	})
+}
+
+// // DeleteSelfHandler 处理当前用户自删除的请求
+func (uc *UserController) DeleteSelfHandler(c *gin.Context) {
+	userID := c.GetInt("id")
+	if userID == 0 {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "无法获取当前用户信息",
+		})
+		return
+	}
+	if err := uc.usecase.DeleteSelf(c.Request.Context(), userID); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "账户已删除",
+	})
+}
+
+// UpdateUserHandler 处理管理员更新用户的请求
+func (uc *UserController) UpdateUserHandler(c *gin.Context) {
+	ctx := c.Request.Context()
+	var req usecase.UpdateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil || req.Id == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": i18n.Translate(c, "invalid_parameter"),
+		})
+		return
+	}
+
+	callerRole := c.GetInt(ctxkey.Role)
+	if callerRole == 0 {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "无法获取调用者权限",
+		})
+		return
+	}
+
+	if err := uc.usecase.UpdateUser(ctx, req, callerRole); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+	})
+}
+
+// DeleteUserHandler 处理管理员删除用户的请求
+func (uc *UserController) DeleteUserHandler(c *gin.Context) {
+	ctx := c.Request.Context()
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "无效的用户 ID",
+		})
+		return
+	}
+
+	callerRole := c.GetInt(ctxkey.Role)
+	if callerRole == 0 {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "无法获取调用者权限",
+		})
+		return
+	}
+
+	if err := uc.usecase.DeleteUser(ctx, id, callerRole); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "用户删除成功",
+	})
+}
+
+// ManageUserHandler 处理管理员管理用户的请求
+func (uc *UserController) ManageUserHandler(c *gin.Context) {
+	var req usecase.ManageRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": i18n.Translate(c, "invalid_parameter"),
+		})
+		return
+	}
+
+	callerRole := c.GetInt("role")
+	if callerRole == 0 {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "无法获取调用者权限",
+		})
+		return
+	}
+
+	updatedUser, err := uc.usecase.ManageUser(c.Request.Context(), req, callerRole)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	// 如果删除操作成功，updatedUser 可能为 nil，此处按更新处理
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+		"data":    updatedUser,
+	})
+}
+
+// EmailBindHandler 处理邮箱绑定请求
+func (uc *UserController) EmailBindHandler(c *gin.Context) {
+	email := c.Query("email")
+	code := c.Query("code")
+	if email == "" || code == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": i18n.Translate(c, "invalid_parameter"),
+		})
+		return
+	}
+	userID := c.GetInt("id")
+	if userID == 0 {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "无法获取当前用户信息",
+		})
+		return
+	}
+	if err := uc.usecase.BindEmail(c.Request.Context(), email, code, userID); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+	})
+}
+
+// GenerateAccessTokenHandler 处理生成访问令牌的请求
+func (uc *UserController) GenerateAccessTokenHandler(c *gin.Context) {
+	userID := c.GetInt(ctxkey.Id)
+	if userID == 0 {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "无法获取当前用户信息",
+		})
+		return
+	}
+	token, err := uc.usecase.GenerateAccessToken(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+		"data":    token,
+	})
+}
+
+// GetAffCodeHandler 处理获取邀请码的请求
+func (uc *UserController) GetAffCodeHandler(c *gin.Context) {
+	userID := c.GetInt(ctxkey.Id)
+	if userID == 0 {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": "无法获取当前用户信息",
+		})
+		return
+	}
+	affCode, err := uc.usecase.GetAffCode(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+		"data":    affCode,
 	})
 }
