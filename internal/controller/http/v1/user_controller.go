@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/9688101/HX/config"
 	"github.com/9688101/HX/internal/entity"
 	"github.com/9688101/HX/internal/usecase"
 	"github.com/9688101/HX/pkg"
-	"github.com/9688101/HX/pkg/config"
 	"github.com/9688101/HX/pkg/ctxkey"
 	"github.com/9688101/HX/pkg/i18n"
 	"github.com/gin-contrib/sessions"
@@ -16,15 +16,16 @@ import (
 
 // RegisterUserHandler 处理用户注册请求
 func (uc *UserController) RegisterUserHandler(c *gin.Context) {
+	cfg := config.GetAuthenticationConfig()
 	// 检查系统配置是否允许注册
-	if !config.RegisterEnabled {
+	if !cfg.RegisterEnabled {
 		c.JSON(http.StatusOK, BaseResponse{
 			Success: false,
 			Message: "管理员关闭了新用户注册",
 		})
 		return
 	}
-	if !config.PasswordRegisterEnabled {
+	if !cfg.PasswordRegisterEnabled {
 		c.JSON(http.StatusOK, BaseResponse{
 			Success: false,
 			Message: "管理员关闭了通过密码进行注册，请使用第三方账户验证的形式进行注册",
@@ -68,7 +69,7 @@ func (uc *UserController) RegisterUserHandler(c *gin.Context) {
 
 // LoginHandler 处理用户密码登录请求
 func (uc *UserController) LoginHandler(c *gin.Context) {
-	if !config.PasswordLoginEnabled {
+	if !config.GetAuthenticationConfig().PasswordLoginEnabled {
 		c.JSON(http.StatusOK, BaseResponse{
 			Message: "管理员关闭了密码登录",
 			Success: false,
@@ -170,8 +171,8 @@ func (uc *UserController) GetUserListHandler(c *gin.Context) {
 		p = 0
 	}
 	order := c.DefaultQuery("order", "")
-	offset := p * config.ItemsPerPage
-	limit := config.ItemsPerPage
+	offset := 10
+	limit := 10
 
 	users, err := uc.usecase.GetUserList(c.Request.Context(), offset, limit, order)
 	if err != nil {

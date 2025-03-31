@@ -10,25 +10,27 @@ import (
 	"strings"
 	"time"
 
-	"github.com/9688101/HX/pkg/config"
+	"github.com/9688101/HX/config"
 	"github.com/9688101/HX/pkg/logger"
 )
 
 func shouldAuth() bool {
-	return config.SMTPAccount != "" || config.SMTPToken != ""
+	cfg := config.GetSMTPConfig()
+	return cfg.SMTPAccount != "" || cfg.SMTPToken != ""
 }
 
 func SendEmail(subject string, receiver string, content string) error {
+	cfg := config.GetSMTPConfig()
 	if receiver == "" {
 		return fmt.Errorf("receiver is empty")
 	}
-	if config.SMTPFrom == "" { // for compatibility
-		config.SMTPFrom = config.SMTPAccount
+	if cfg.SMTPFrom == "" { // for compatibility
+		cfg.SMTPFrom = cfg.SMTPAccount
 	}
 	encodedSubject := fmt.Sprintf("=?UTF-8?B?%s?=", base64.StdEncoding.EncodeToString([]byte(subject)))
 
 	// Extract domain from SMTPFrom
-	parts := strings.Split(config.SMTPFrom, "@")
+	parts := strings.Split(cfg.SMTPFrom, "@")
 	var domain string
 	if len(parts) > 1 {
 		domain = parts[1]
@@ -47,29 +49,29 @@ func SendEmail(subject string, receiver string, content string) error {
 		"Message-ID: %s\r\n"+ // add Message-ID header to avoid being treated as spam, RFC 5322
 		"Date: %s\r\n"+
 		"Content-Type: text/html; charset=UTF-8\r\n\r\n%s\r\n",
-		receiver, config.SystemName, config.SMTPFrom, encodedSubject, messageId, time.Now().Format(time.RFC1123Z), content))
+		receiver, config.GetSystemConfig().SystemName, cfg.SMTPFrom, encodedSubject, messageId, time.Now().Format(time.RFC1123Z), content))
 
-	auth := smtp.PlainAuth("", config.SMTPAccount, config.SMTPToken, config.SMTPServer)
-	addr := fmt.Sprintf("%s:%d", config.SMTPServer, config.SMTPPort)
+	auth := smtp.PlainAuth("", cfg.SMTPAccount, cfg.SMTPToken, cfg.SMTPServer)
+	addr := fmt.Sprintf("%s:%d", cfg.SMTPServer, cfg.SMTPPort)
 	to := strings.Split(receiver, ";")
 
-	if config.SMTPPort == 465 || !shouldAuth() {
+	if cfg.SMTPPort == 465 || !shouldAuth() {
 		// need advanced client
 		var conn net.Conn
 		var err error
-		if config.SMTPPort == 465 {
+		if cfg.SMTPPort == 465 {
 			tlsConfig := &tls.Config{
 				InsecureSkipVerify: true,
-				ServerName:         config.SMTPServer,
+				ServerName:         cfg.SMTPServer,
 			}
-			conn, err = tls.Dial("tcp", fmt.Sprintf("%s:%d", config.SMTPServer, config.SMTPPort), tlsConfig)
+			conn, err = tls.Dial("tcp", fmt.Sprintf("%s:%d", cfg.SMTPServer, cfg.SMTPPort), tlsConfig)
 		} else {
-			conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", config.SMTPServer, config.SMTPPort))
+			conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", cfg.SMTPServer, cfg.SMTPPort))
 		}
 		if err != nil {
 			return err
 		}
-		client, err := smtp.NewClient(conn, config.SMTPServer)
+		client, err := smtp.NewClient(conn, cfg.SMTPServer)
 		if err != nil {
 			return err
 		}
@@ -79,7 +81,7 @@ func SendEmail(subject string, receiver string, content string) error {
 				return err
 			}
 		}
-		if err = client.Mail(config.SMTPFrom); err != nil {
+		if err = client.Mail(cfg.SMTPFrom); err != nil {
 			return err
 		}
 		receiverEmails := strings.Split(receiver, ";")
@@ -102,7 +104,7 @@ func SendEmail(subject string, receiver string, content string) error {
 		}
 		return nil
 	}
-	err = smtp.SendMail(addr, auth, config.SMTPAccount, to, mail)
+	err = smtp.SendMail(addr, auth, cfg.SMTPAccount, to, mail)
 	if err != nil && strings.Contains(err.Error(), "short response") { // 部分提供商返回该错误，但实际上邮件已经发送成功
 		logger.SysWarnf("short response from SMTP server, return nil instead of error: %s", err.Error())
 		return nil

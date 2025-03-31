@@ -19,6 +19,7 @@ system:
   # 新增服务条款和隐私政策链接
   terms_of_service_link: ""
   privacy_policy_link: ""
+  theme: "default"
 
 server:
   address: "0.0.0.0"        # 服务器监听地址
@@ -188,14 +189,12 @@ log:
   enable_console: true
 
 database:
-  type: "mysql"
-  host: "127.0.0.1"
-  port: 3306
-  username: "root"
-  password: ""
-  database: "app_db"
-  charset: "utf8mb4"
   options: ""
+  using_sqlite: false
+  using_postgresql: false
+  using_mysql: false
+  sqlite_path: "hx.db"
+  sqlite_busy_timeout: 3000
 
 payment:
   enabled: false

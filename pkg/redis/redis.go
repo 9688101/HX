@@ -1,4 +1,4 @@
-package initialize
+package redis
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 )
 
 var RedisEnabled = true
-var RDB *redis.UniversalOptions
+var RDB redis.UniversalClient // Changed to interface type
 
 func InitRedisClient(cfg *config.RedisConfig) (err error) {
 	if cfg.RedisConnString == "" {
@@ -19,45 +19,50 @@ func InitRedisClient(cfg *config.RedisConfig) (err error) {
 		logger.SysLog("REDIS_CONN_STRING not set, Redis is not enabled")
 		return nil
 	}
-	if cfg.SyncFrequency == 0 {
+	if cfg.SyncFrequency == "" { // Corrected: Check for empty string
 		RedisEnabled = false
 		logger.SysLog("SYNC_FREQUENCY not set, Redis is disabled")
 		return nil
 	}
+
 	url := cfg.RedisConnString
+	logger.SysLog("Redis is enabled") // Moved log message
+
 	if cfg.RedisMasterName == "" {
-		logger.SysLog("Redis is enabled")
+		// Standalone mode
+		logger.SysLog("Redis standalone mode")
 		opt, err := redis.ParseURL(url)
 		if err != nil {
 			logger.FatalLog("failed to parse Redis connection string: " + err.Error())
+			return err
 		}
 		RDB = redis.NewClient(opt)
 	} else {
-		// cluster mode
+		// Cluster mode
 		logger.SysLog("Redis cluster mode enabled")
+		addrs := strings.Split(url, ",")
 		RDB = redis.NewUniversalClient(&redis.UniversalOptions{
-			Addrs:      strings.Split(url, ","),
+			Addrs:      addrs,
 			Password:   cfg.RedisPassword,
 			MasterName: cfg.RedisMasterName,
+			DB:         cfg.Database, // Added: Use Database from config
 		})
 	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	_, err = RDB.Ping(ctx).Result()
 	if err != nil {
 		logger.FatalLog("Redis ping test failed: " + err.Error())
+		return err
 	}
-	return err
+	return nil
 }
 
-func ParseRedisOption(url string) *redis.Options {
-	opt, err := redis.ParseURL(url)
-	if err != nil {
-		logger.FatalLog("failed to parse Redis connection string: " + err.Error())
-	}
-	return opt
-}
+// ParseRedisOption function is redundant and can be removed.
+// The logic is now within InitRedisClient.
+
 func RedisSet(key string, value string, expiration time.Duration) error {
 	ctx := context.Background()
 	return RDB.Set(ctx, key, value, expiration).Err()
@@ -65,7 +70,11 @@ func RedisSet(key string, value string, expiration time.Duration) error {
 
 func RedisGet(key string) (string, error) {
 	ctx := context.Background()
-	return RDB.Get(ctx, key).Result()
+	result, err := RDB.Get(ctx, key).Result()
+	if err == redis.Nil {
+		return "", nil // Handle the case where the key does not exist
+	}
+	return result, err
 }
 
 func RedisDel(key string) error {

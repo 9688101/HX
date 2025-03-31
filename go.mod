@@ -3,11 +3,12 @@ module github.com/9688101/HX
 go 1.23.2
 
 require (
+	github.com/gin-contrib/cors v1.7.4
+	github.com/gin-contrib/gzip v1.2.2
 	github.com/gin-contrib/sessions v1.0.2
 	github.com/gin-contrib/static v1.1.3
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-playground/validator/v10 v10.25.0
-	github.com/go-redis/redis/v8 v8.11.5
 	github.com/google/uuid v1.6.0
 	github.com/redis/go-redis/v9 v9.7.3
 	github.com/smartystreets/goconvey v1.8.1

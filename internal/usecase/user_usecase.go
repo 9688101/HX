@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/9688101/HX/config"
 	"github.com/9688101/HX/internal/entity"
 	"github.com/9688101/HX/pkg"
-	"github.com/9688101/HX/pkg/config"
 	"github.com/9688101/HX/pkg/random"
 	"github.com/9688101/HX/pkg/utils"
 )
@@ -15,7 +15,7 @@ import (
 // 注册
 func (uc *userUseCase) RegisterUser(ctx context.Context, req RegisterUserRequest) error {
 	// 如果开启邮箱验证，则校验邮箱和验证码
-	if config.EmailVerificationEnabled {
+	if config.GetAuthenticationConfig().EmailVerificationEnabled {
 		if req.Email == "" || req.VerificationCode == "" {
 			return errors.New("管理员开启了邮箱验证，请输入邮箱地址和验证码")
 		}
@@ -38,7 +38,7 @@ func (uc *userUseCase) RegisterUser(ctx context.Context, req RegisterUserRequest
 		InviterId:   inviterId,
 	}
 	// 如果开启邮箱验证，则设置邮箱
-	if config.EmailVerificationEnabled {
+	if config.GetAuthenticationConfig().EmailVerificationEnabled {
 		newUser.Email = req.Email
 	}
 

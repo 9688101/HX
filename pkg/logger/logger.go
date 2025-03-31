@@ -14,7 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/9688101/HX/pkg/config"
+	"github.com/9688101/HX/config"
 	"github.com/9688101/HX/pkg/helper"
 )
 
@@ -34,10 +34,10 @@ func SetupLogger() {
 	setupLogOnce.Do(func() {
 		if LogDir != "" {
 			var logPath string
-			if config.OnlyOneLogFile {
-				logPath = filepath.Join(LogDir, "oneapi.log")
+			if config.GetGeneralConfig().OnlyOneLogFile {
+				logPath = filepath.Join(LogDir, "HX.log")
 			} else {
-				logPath = filepath.Join(LogDir, fmt.Sprintf("oneapi-%s.log", time.Now().Format("20060102")))
+				logPath = filepath.Join(LogDir, fmt.Sprintf("HX-%s.log", time.Now().Format("20060102")))
 			}
 			fd, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			if err != nil {
@@ -74,7 +74,7 @@ func SysErrorf(format string, a ...any) {
 }
 
 func Debug(ctx context.Context, msg string) {
-	if !config.DebugEnabled {
+	if !config.GetDebugConfig().DebugEnabled {
 		return
 	}
 	logHelper(ctx, loggerDEBUG, msg)
@@ -93,7 +93,7 @@ func Error(ctx context.Context, msg string) {
 }
 
 func Debugf(ctx context.Context, format string, a ...any) {
-	if !config.DebugEnabled {
+	if !config.GetDebugConfig().DebugEnabled {
 		return
 	}
 	logHelper(ctx, loggerDEBUG, fmt.Sprintf(format, a...))
