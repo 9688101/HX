@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/9688101/HX/config"
 	v1 "github.com/9688101/HX/internal/controller/http/v1"
 	"github.com/9688101/HX/internal/middleware"
 	"github.com/9688101/HX/pkg"
@@ -15,11 +16,12 @@ import (
 )
 
 func SetWebRouter(router *gin.Engine, buildFS embed.FS) {
-	indexPageData, _ := buildFS.ReadFile(fmt.Sprintf("web/build/%s/index.html", "default"))
+	cfg := config.GetSystemConfig()
+	indexPageData, _ := buildFS.ReadFile(fmt.Sprintf("web/build/%s/index.html", cfg.Theme))
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	// router.Use(middleware.GlobalWebRateLimit())
 	router.Use(middleware.Cache())
-	router.Use(static.Serve("/", pkg.EmbedFolder(buildFS, fmt.Sprintf("web/build/%s", "default"))))
+	router.Use(static.Serve("/", pkg.EmbedFolder(buildFS, fmt.Sprintf("web/build/%s", cfg.Theme))))
 	router.NoRoute(func(c *gin.Context) {
 		if strings.HasPrefix(c.Request.RequestURI, "/v1") || strings.HasPrefix(c.Request.RequestURI, "/api") {
 			v1.RelayNotFound(c)
