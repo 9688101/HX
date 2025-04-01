@@ -47,16 +47,16 @@ func (r *userRepo) GetUserByUsername(ctx context.Context, username string, inclu
 func (r *userRepo) GetUserList(ctx context.Context, offset, limit int, order string) ([]*entity.User, error) {
 	var users []*entity.User
 	query := r.db.WithContext(ctx).Model(&entity.User{}).Where("status != ?", entity.UserStatusDeleted)
-	switch order {
-	case "quota":
-		query = query.Order("quota desc")
-	case "used_quota":
-		query = query.Order("used_quota desc")
-	case "request_count":
-		query = query.Order("request_count desc")
-	default:
-		query = query.Order("id desc")
-	}
+	// switch order {
+	// case "quota":
+	// 	query = query.Order("quota desc")
+	// case "used_quota":
+	// 	query = query.Order("used_quota desc")
+	// case "request_count":
+	// 	query = query.Order("request_count desc")
+	// default:
+	// 	query = query.Order("id desc")
+	// }
 	if err := query.Offset(offset).Limit(limit).Find(&users).Error; err != nil {
 		return nil, err
 	}

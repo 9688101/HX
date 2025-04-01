@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/9688101/HX/config"
-	"github.com/9688101/HX/internal/entity"
 	"github.com/9688101/HX/pkg/env"
 	"github.com/9688101/HX/pkg/logger"
 
@@ -35,10 +34,6 @@ func InitDB() {
 		_, _ = sqlDB.Exec("DROP INDEX idx_channels_key ON channels;") // TODO: delete this line when most users have upgraded
 	}
 	logger.SysLog("database migration started")
-	if err = entity.MigrateDB(DB); err != nil {
-		logger.FatalLog("failed to migrate database: " + err.Error())
-		return
-	}
 	logger.SysLog("database migrated")
 }
 
@@ -52,7 +47,7 @@ func CloseDB(db *gorm.DB) error {
 }
 
 func SetDBConns(db *gorm.DB) *sql.DB {
-	if config.GetDebugConfig().DebugSQLEnabled {
+	if config.GetDebugConfig().DebugEnabled {
 		db = db.Debug()
 	}
 

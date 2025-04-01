@@ -9,34 +9,36 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupUserRouter() *gin.Engine {
-	r := gin.Default()
+func SetupUserRouter(r *gin.Engine) *gin.Engine {
 
 	userRepo := repo.NewUserRepository(db.GetDB())
 	userUseCase := usecase.NewUserUseCase(userRepo)
 	userController := v1.NewUserController(userUseCase)
 
-	apiRouter := r.Group("/user")
+	apiRouter := r.Group("/api")
 	apiRouter.Use(gzip.Gzip(gzip.DefaultCompression))
 	// apiRouter.Use(middleware.GlobalAPIRateLimit())
 	{
-		// 注册用户接口
-		r.POST("/register", userController.RegisterUserHandler)
-		r.POST("/login", userController.LoginHandler)
-		r.POST("/logout", userController.LogoutHandler)
-		r.GET("/users", userController.GetUserListHandler)
-		r.GET("/users/search", userController.SearchUsersHandler)
-		r.GET("/user/:id", userController.GetUserHandler)
-		r.PUT("/user/self", userController.UpdateSelfHandler)
-		r.GET("/user/self", userController.GetSelfHandler)
-		r.DELETE("/user/self", userController.DeleteSelfHandler)
-		r.PUT("/user/:id", userController.UpdateUserHandler)
-		r.DELETE("/user/:id", userController.DeleteUserHandler)
-		r.POST("/user/bind-email", userController.EmailBindHandler)
-		r.POST("/user/manage", userController.ManageUserHandler)
-		r.GET("/user/aff-code", userController.GetAffCodeHandler)
-		r.POST("/user/generate-access-token", userController.GenerateAccessTokenHandler)
+		userRouter := apiRouter.Group("/user")
+		{
 
+			// 注册用户接口
+			userRouter.POST("/register", userController.RegisterUserHandler)
+			userRouter.POST("/login", userController.LoginHandler)
+			userRouter.POST("/logout", userController.LogoutHandler)
+			userRouter.GET("/users", userController.GetUserListHandler)
+			userRouter.GET("/users/search", userController.SearchUsersHandler)
+			userRouter.GET("/user/:id", userController.GetUserHandler)
+			userRouter.PUT("/user/self", userController.UpdateSelfHandler)
+			userRouter.GET("/user/self", userController.GetSelfHandler)
+			userRouter.DELETE("/user/self", userController.DeleteSelfHandler)
+			userRouter.PUT("/user/:id", userController.UpdateUserHandler)
+			userRouter.DELETE("/user/:id", userController.DeleteUserHandler)
+			userRouter.POST("/user/bind-email", userController.EmailBindHandler)
+			userRouter.POST("/user/manage", userController.ManageUserHandler)
+			userRouter.GET("/user/aff", userController.GetAffCodeHandler)
+			userRouter.POST("/user/generate-access-token", userController.GenerateAccessTokenHandler)
+		}
 		return r
 	}
 }

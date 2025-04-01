@@ -1,27 +1,74 @@
 package config
 
-// Config represents the overall application configuration.
-type Config struct {
-	SystemConfig         *SystemConfig         `mapstructure:"system" yaml:"system"`
-	ServerConfig         *ServerConfig         `mapstructure:"server" yaml:"server"`
-	SessionConfig        *SessionConfig        `mapstructure:"session" yaml:"session"`
-	AuthenticationConfig *AuthenticationConfig `mapstructure:"authentication" yaml:"authentication"`
-	DebugConfig          *DebugConfig          `mapstructure:"debug" yaml:"debug"`
-	SMTPConfig           *SMTPConfig           `mapstructure:"smtp" yaml:"smtp"`
-	OAuthConfig          *OAuthConfig          `mapstructure:"oauth" yaml:"oauth"`
-	WeChatConfig         *WeChatConfig         `mapstructure:"wechat" yaml:"wechat"`
-	MessageConfig        *MessageConfig        `mapstructure:"message" yaml:"message"`
-	TurnstileConfig      *TurnstileConfig      `mapstructure:"turnstile" yaml:"turnstile"`
-	SyncConfig           *SyncConfig           `mapstructure:"sync" yaml:"sync"`
-	RateLimitConfig      *RateLimitConfig      `mapstructure:"rate_limit" yaml:"rate_limit"`
-	GeneralConfig        *GeneralConfig        `mapstructure:"general" yaml:"general"`
-	TestConfig           *TestConfig           `mapstructure:"test" yaml:"test"`
-	RedisConfig          *RedisConfig          `mapstructure:",squash"` // Redis 配置提升到顶层
-	LogConfig            *LogConfig            `mapstructure:"log" yaml:"log"`
-	DatabaseConfig       *DatabaseConfig       `mapstructure:"database" yaml:"database"`
-}
+// Cfg is the global configuration instance.
+var GlobalConfig = new(Config)
 
 // GetConfig returns the global configuration instance.
 func GetConfig() *Config {
-	return Cfg
+	return GlobalConfig
+}
+
+// GetSystemConfig returns the system configuration.
+func GetSystemConfig() *SystemConfig {
+	return GlobalConfig.SystemConfig
+}
+
+// GetServerConfig returns the server configuration.
+func GetServerConfig() *ServerConfig {
+	return GlobalConfig.ServerConfig
+}
+
+// GetRedisConfig returns the Redis configuration.
+func GetRedisConfig() *RedisConfig {
+	return GlobalConfig.RedisConfig
+}
+
+// GetAuthenticationConfig returns the authentication configuration.
+func GetAuthenticationConfig() *AuthenticationConfig {
+	return GlobalConfig.AuthenticationConfig
+}
+
+// GetDebugConfig returns the debug configuration.
+func GetDebugConfig() *DebugConfig {
+	return GlobalConfig.DebugConfig
+}
+
+// GetSMTPConfig returns the SMTP configuration.
+func GetSMTPConfig() *SMTPConfig {
+	return GlobalConfig.SMTPConfig
+}
+
+// GetOAuthConfig returns the OAuth configuration.
+func GetOAuthConfig() *OAuthConfig {
+	return GlobalConfig.OAuthConfig
+}
+
+// GetWeChatConfig returns the WeChat configuration.
+func GetWeChatConfig() *WeChatConfig {
+	return GlobalConfig.WeChatConfig
+}
+
+// GetMessageConfig returns the message configuration.
+func GetMessageConfig() *MessageConfig {
+	return GlobalConfig.MessageConfig
+}
+
+// GetTurnstileConfig returns the turnstile configuration.
+func GetTurnstileConfig() *TurnstileConfig {
+	return GlobalConfig.TurnstileConfig
+}
+
+// GetRateLimitConfig returns the rate limit configuration.
+func GetRateLimitConfig() *RateLimitConfig {
+	return GlobalConfig.RateLimitConfig
+}
+
+// GetGeneralConfig returns the general configuration.
+func GetGeneralConfig() *GeneralConfig {
+	return GlobalConfig.GeneralConfig
+}
+
+// GetDatabaseConfig returns the database configuration.
+func GetDatabaseConfig() *DatabaseConfig {
+	return GlobalConfig.DatabaseConfig
 }

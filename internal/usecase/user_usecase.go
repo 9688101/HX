@@ -36,6 +36,8 @@ func (uc *userUseCase) RegisterUser(ctx context.Context, req RegisterUserRequest
 		Password:    req.Password,
 		DisplayName: displayName,
 		InviterId:   inviterId,
+		AffCode:     random.GetRandomString(4),
+		AccessToken: random.GetUUID(),
 	}
 	// 如果开启邮箱验证，则设置邮箱
 	if config.GetAuthenticationConfig().EmailVerificationEnabled {
@@ -52,12 +54,12 @@ func (uc *userUseCase) RegisterUser(ctx context.Context, req RegisterUserRequest
 // 登录
 func (uc *userUseCase) Login(ctx context.Context, username, password string) (*entity.User, error) {
 	// 从 Repo 层查询用户记录（假设按用户名唯一查询）
-	user, err := uc.repo.GetUserByUsername(ctx, username, false)
+	user, err := uc.repo.GetUserByUsername(ctx, username, true)
 	if err != nil {
 		return nil, errors.New("用户名或密码错误")
 	}
 
-	// 使用 common 包中的方法验证密码（假设 user.Password 为加密后密码）
+	// 使用 pkg 包中的方法验证密码（假设 user.Password 为加密后密码）
 	if !utils.ValidatePasswordAndHash(password, user.Password) {
 		return nil, errors.New("用户名或密码错误")
 	}

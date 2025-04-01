@@ -7,6 +7,7 @@ import (
 
 	"github.com/9688101/HX/config"
 	v1 "github.com/9688101/HX/internal/controller/http"
+	"github.com/9688101/HX/internal/entity"
 	"github.com/9688101/HX/internal/middleware"
 	"github.com/9688101/HX/pkg/db"
 	"github.com/9688101/HX/pkg/i18n"
@@ -17,10 +18,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// // go:embed /web/build/*
-var buildFS embed.FS
-
-func Run() {
+func Run(buildFS embed.FS) {
 	config.InitConfig()
 	cfg := config.GetConfig()
 	start()
@@ -36,7 +34,7 @@ func Run() {
 
 	// Initialize SQL Database
 	db.InitDB()
-
+	entity.MigrateDB(db.DB)
 	var err error
 	err = CreateRootAccountIfNeed()
 	if err != nil {
@@ -50,7 +48,7 @@ func Run() {
 	}()
 
 	// Initialize Redis
-	err = redis.InitRedisClient(config.GetRedisConfig())
+	err = redis.InitRedisClient()
 	if err != nil {
 		logger.FatalLog("failed to initialize Redis: " + err.Error())
 	}
@@ -96,9 +94,9 @@ func Run() {
 	server.Use(middleware.Language())
 	middleware.SetUpLogger(server)
 	// Initialize session store
-	store := cookie.NewStore([]byte(config.GetSessionConfig().SessionSecret))
+	store := cookie.NewStore([]byte(config.GetAuthenticationConfig().SessionSecret))
 	server.Use(sessions.Sessions("session", store))
-	v1.SetWebRouter(server, buildFS)
+	v1.SetRouter(server, buildFS)
 	var port = os.Getenv("PORT")
 	if port == "" {
 		port = strconv.Itoa(config.GetServerConfig().Port)

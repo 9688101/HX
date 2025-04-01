@@ -10,18 +10,13 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Cfg is the global configuration instance.
-var Cfg = new(Config)
-
 // InitConfig initializes the configuration from various sources.
 func InitConfig() error {
 	// 1. Load from configuration file (config.yaml by default)
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath("./config")   // Look for config in the working directory
-	viper.AddConfigPath("/etc/app")   // Optionally add other paths
-	viper.AddConfigPath("$HOME/.app") // Optionally add user's home directory
-
+	viper.AddConfigPath("./config") // Look for config in the working directory
+	viper.AddConfigPath("/")        // Optionally add other paths
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			// Config file was found but another error occurred
@@ -45,7 +40,7 @@ func InitConfig() error {
 	setDefaultValues()
 
 	// 5. Bind the loaded configuration to the Cfg struct
-	if err := viper.Unmarshal(Cfg); err != nil {
+	if err := viper.Unmarshal(GlobalConfig); err != nil {
 		return err
 	}
 
@@ -55,10 +50,17 @@ func InitConfig() error {
 	}
 
 	// Generate default session secret if not provided
-	if Cfg.SessionConfig.SessionSecret == "" {
-		Cfg.SessionConfig.SessionSecret = uuid.New().String()
+	if GlobalConfig.AuthenticationConfig.SessionSecret == "" {
+		GlobalConfig.AuthenticationConfig.SessionSecret = uuid.New().String()
 	}
+	// configData := viper.AllSettings()
 
+	// fmt.Println("Viper Configuration Data (Deep Print):")
+	// for key, value := range configData {
+	// 	fmt.Printf("%s: ", key)
+	// 	deepPrintValue(value, 0)
+	// 	fmt.Println()
+	// }
 	return nil
 }
 
@@ -83,7 +85,7 @@ func WatchConfigFile() {
 	viper.WatchConfig()
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		println("Config file changed:", e.Name)
-		if err := viper.Unmarshal(Cfg); err != nil {
+		if err := viper.Unmarshal(GlobalConfig); err != nil {
 			println("Error unmarshalling config:", err)
 		}
 	})
@@ -97,7 +99,7 @@ func LoadConfigFromReader(configType string, reader io.Reader) error {
 	if err := v.ReadConfig(reader); err != nil {
 		return err
 	}
-	return v.Unmarshal(Cfg)
+	return v.Unmarshal(GlobalConfig)
 }
 
 // LoadConfigFromString allows loading configuration from a string.
@@ -107,7 +109,7 @@ func LoadConfigFromString(configType, configString string) error {
 	if err := v.ReadConfig(strings.NewReader(configString)); err != nil {
 		return err
 	}
-	return v.Unmarshal(Cfg)
+	return v.Unmarshal(GlobalConfig)
 }
 
 // LoadConfigFromMap allows loading configuration from a map.
@@ -116,5 +118,5 @@ func LoadConfigFromMap(configMap map[string]interface{}) error {
 	for key, value := range configMap {
 		v.Set(key, value)
 	}
-	return v.Unmarshal(Cfg)
+	return v.Unmarshal(GlobalConfig)
 }

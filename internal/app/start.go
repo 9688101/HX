@@ -35,26 +35,11 @@ func CreateRootAccountIfNeed() error {
 			Status:      entity.UserStatusEnabled,
 			DisplayName: "Root User",
 			AccessToken: accessToken,
-			Quota:       500000000000000,
+			AffCode:     random.GetRandomString(4),
 		}
 		db.DB.Create(&rootUser)
-		// if config.GetGeneralConfig().InitialRootToken != "" {
-		// 	logger.SysLog("creating initial root token as requested")
-		// 	token := entity.Token{
-		// 		Id:             1,
-		// 		UserId:         rootUser.Id,
-		// 		Key:            config.InitialRootToken,
-		// 		Status:         entity.TokenStatusEnabled,
-		// 		Name:           "Initial Root Token",
-		// 		CreatedTime:    helper.GetTimestamp(),
-		// 		AccessedTime:   helper.GetTimestamp(),
-		// 		ExpiredTime:    -1,
-		// 		RemainQuota:    500000000000000,
-		// 		UnlimitedQuota: true,
-		// 	}
-		// 	db.DB.Create(&token)
+		return nil
 	}
-	// }
 	return nil
 }
 
@@ -74,7 +59,7 @@ func start() {
 		if os.Getenv("SESSION_SECRET") == "random_string" {
 			logger.SysError("SESSION_SECRET is set to an example value, please change it to a random string.")
 		} else {
-			config.GetSessionConfig().SessionSecret = os.Getenv("SESSION_SECRET")
+			config.GetAuthenticationConfig().SessionSecret = os.Getenv("SESSION_SECRET")
 		}
 	}
 	if *LogDir != "" {

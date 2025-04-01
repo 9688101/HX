@@ -34,7 +34,7 @@ func SetupLogger() {
 	setupLogOnce.Do(func() {
 		if LogDir != "" {
 			var logPath string
-			if config.GetGeneralConfig().OnlyOneLogFile {
+			if config.GetServerConfig().OnlyOneLogFile {
 				logPath = filepath.Join(LogDir, "HX.log")
 			} else {
 				logPath = filepath.Join(LogDir, fmt.Sprintf("HX-%s.log", time.Now().Format("20060102")))

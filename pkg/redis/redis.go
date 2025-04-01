@@ -13,7 +13,8 @@ import (
 var RedisEnabled = true
 var RDB redis.UniversalClient // Changed to interface type
 
-func InitRedisClient(cfg *config.RedisConfig) (err error) {
+func InitRedisClient() (err error) {
+	cfg := config.GetRedisConfig()
 	if cfg.RedisConnString == "" {
 		RedisEnabled = false
 		logger.SysLog("REDIS_CONN_STRING not set, Redis is not enabled")
