@@ -4,10 +4,29 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/9688101/HX/config"
 	"github.com/9688101/HX/internal/entity"
 	"github.com/gin-gonic/gin"
 )
+
+// import (
+// 	"fmt"
+// 	"net/http"
+
+// 	"github.com/9688101/HX/config"
+// 	"github.com/9688101/HX/internal/entity"
+// 	"github.com/9688101/HX/internal/usecase"
+// 	"github.com/gin-gonic/gin"
+// )
+
+// type MiscController struct {
+// 	cfgUsecase *usecase.ConfigUsecase
+// }
+
+// func NewMiscController(cfgUsecase *usecase.ConfigUsecase) *MiscController {
+// 	return &MiscController{
+// 		cfgUsecase: cfgUsecase,
+// 	}
+// }
 
 func RelayNotFound(c *gin.Context) {
 	err := entity.Error{
@@ -21,42 +40,46 @@ func RelayNotFound(c *gin.Context) {
 	})
 }
 
-// 获取系统状态
-func GetStatus(c *gin.Context) {
-	cfg := config.GetConfig()
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "",
-		"data": gin.H{
-			// "version":                     pkg.Version,
-			// "start_time":                  pkg.StartTime,
-			"email_verification": cfg.AuthenticationConfig.EmailVerificationEnabled,
-			// "github_oauth":                cfg.OAuthConfig.GitHubOAuthEnabled,
-			"github_client_id": cfg.OAuthConfig.GitHubClientId,
-			"lark_client_id":   cfg.OAuthConfig.LarkClientId,
-			"system_name":      cfg.SystemConfig.SystemName,
-			"logo":             cfg.SystemConfig.Logo,
-			// "footer_html":                 cfg.SystemConfig.FooterHTML,
-			"wechat_qrcode": cfg.WeChatConfig.WeChatAccountQRCodeImageURL,
-			// "wechat_login":                cfg.WeChatConfig.WeChatAuthEnabled,
-			// "server_address":              cfg.ServerConfig.ServerAddress,
-			"turnstile_check":    cfg.AuthenticationConfig.TurnstileCheckEnabled,
-			"turnstile_site_key": cfg.TurnstileConfig.TurnstileSiteKey,
-			// "chat_link":                   cfg.GeneralConfig.ChatLink,
-			// "quota_per_unit":              cfg.GeneralConfig.QuotaPerUnit,
-			// "display_in_currency":         cfg.GeneralConfig.DisplayInCurrencyEnabled,
-			"oidc":                        cfg.AuthenticationConfig.OidcEnabled,
-			"oidc_client_id":              cfg.OAuthConfig.OidcClientId,
-			"oidc_well_known":             cfg.OAuthConfig.OidcWellKnown,
-			"oidc_authorization_endpoint": cfg.OAuthConfig.OidcAuthorizationEndpoint,
-			"oidc_token_endpoint":         cfg.OAuthConfig.OidcTokenEndpoint,
-			"oidc_userinfo_endpoint":      cfg.OAuthConfig.OidcUserinfoEndpoint,
-		},
-	})
-	return
-}
+// // 获取系统状态
+// func (mc MiscController) GetStatus(c *gin.Context) {
+// 	sysCfg, _ := mc.cfgUsecase.GetConfig("system")
+// 	wxCfg, _ := mc.cfgUsecase.GetConfig("wechat")
+// 	msgCfg, _ := mc.cfgUsecase.GetConfig("message")
+// 	authCfg, _ := mc.cfgUsecase.GetConfig("authentication")
+// 	TurnstileCfg, _ := mc.cfgUsecase.GetConfig("turnstile")
+// 	cfg, _ := mc.cfgUsecase.GetConfig("system")
+// 	OAuthCfg, _ := mc.cfgUsecase.GetConfig("oauth")
 
-// func GetNotice(c *gin.Context) {
+// 	c.JSON(http.StatusOK, gin.H{
+// 		"success": true,
+// 		"message": "",
+// 		"data": gin.H{
+// 			// "version":                     pkg.Version,
+// 			// "start_time":                  pkg.StartTime,
+// 			"email_verification":          cfg.AuthenticationConfig.EmailVerificationEnabled,
+// 			"github_oauth":                cfg.OAuthConfig.GitHubOAuthEnabled,
+// 			"github_client_id":            cfg.OAuthConfig.GitHubClientId,
+// 			"lark_client_id":              cfg.OAuthConfig.LarkClientId,
+// 			"system_name":                 sysCfg.SystemName,
+// 			"logo":                        cfg.SystemConfig.Logo,
+// 			"footer_html":                 cfg.SystemConfig.FooterHTML,
+// 			"wechat_qrcode":               cfg.WeChatConfig.WeChatAccountQRCodeImageURL,
+// 			"wechat_login":                cfg.WeChatConfig.WeChatAuthEnabled,
+// 			"server_address":              cfg.ServerConfig.ServerAddress,
+// 			"turnstile_check":             cfg.AuthenticationConfig.TurnstileCheckEnabled,
+// 			"turnstile_site_key":          cfg.TurnstileConfig.TurnstileSiteKey,
+// 			"oidc":                        cfg.AuthenticationConfig.OidcEnabled,
+// 			"oidc_client_id":              cfg.OAuthConfig.OidcClientId,
+// 			"oidc_well_known":             cfg.OAuthConfig.OidcWellKnown,
+// 			"oidc_authorization_endpoint": cfg.OAuthConfig.OidcAuthorizationEndpoint,
+// 			"oidc_token_endpoint":         cfg.OAuthConfig.OidcTokenEndpoint,
+// 			"oidc_userinfo_endpoint":      cfg.OAuthConfig.OidcUserinfoEndpoint,
+// 		},
+// 	})
+// 	return
+// }
+
+// func (mc MiscController) GetNotice(c *gin.Context) {
 // 	config.OptionMapRWMutex.RLock()
 // 	defer config.OptionMapRWMutex.RUnlock()
 // 	c.JSON(http.StatusOK, gin.H{
@@ -67,7 +90,7 @@ func GetStatus(c *gin.Context) {
 // 	return
 // }
 
-// func GetAbout(c *gin.Context) {
+// func (mc MiscController) GetAbout(c *gin.Context) {
 // 	config.OptionMapRWMutex.RLock()
 // 	defer config.OptionMapRWMutex.RUnlock()
 // 	c.JSON(http.StatusOK, gin.H{
@@ -78,7 +101,7 @@ func GetStatus(c *gin.Context) {
 // 	return
 // }
 
-// func GetHomePageContent(c *gin.Context) {
+// func (mc MiscController) GetHomePageContent(c *gin.Context) {
 // 	config.OptionMapRWMutex.RLock()
 // 	defer config.OptionMapRWMutex.RUnlock()
 // 	c.JSON(http.StatusOK, gin.H{
@@ -89,7 +112,7 @@ func GetStatus(c *gin.Context) {
 // 	return
 // }
 
-// func SendEmailVerification(c *gin.Context) {
+// func (mc MiscController) SendEmailVerification(c *gin.Context) {
 // 	email := c.Query("email")
 // 	if err := common.Validate.Var(email, "required,email"); err != nil {
 // 		c.JSON(http.StatusOK, gin.H{
@@ -149,7 +172,7 @@ func GetStatus(c *gin.Context) {
 // 	return
 // }
 
-// func SendPasswordResetEmail(c *gin.Context) {
+// func (mc MiscController) SendPasswordResetEmail(c *gin.Context) {
 // 	email := c.Query("email")
 // 	if err := pkg.Validate.Var(email, "required,email"); err != nil {
 // 		c.JSON(http.StatusOK, gin.H{
@@ -198,12 +221,12 @@ func GetStatus(c *gin.Context) {
 // 	return
 // }
 
-// type PasswordResetRequest struct {
+// type (mc MiscController)PasswordResetRequest struct {
 // 	Email string `json:"email"`
 // 	Token string `json:"token"`
 // }
 
-// func ResetPassword(c *gin.Context) {
+// func (mc MiscController)ResetPassword(c *gin.Context) {
 // 	var req PasswordResetRequest
 // 	err := json.NewDecoder(c.Request.Body).Decode(&req)
 // 	if req.Email == "" || req.Token == "" {
