@@ -25,16 +25,3 @@ func validateConfig() error {
 	// Add more validation rules as needed
 	return nil
 }
-
-// validateConfig performs custom configuration validation.
-func ValidThemes(key string) bool {
-	var ValidThemes = map[string]bool{
-		"default": true,
-		"berry":   true,
-		"air":     true,
-	}
-	if !ValidThemes[key] {
-		return false
-	}
-	return true
-}

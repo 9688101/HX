@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/9688101/HX/config"
+	"github.com/9688101/HX/internal/dyncfg"
 	"github.com/9688101/HX/internal/entity"
 	"github.com/9688101/HX/pkg"
 	"github.com/9688101/HX/pkg/random"
@@ -15,7 +15,7 @@ import (
 // 注册
 func (uc *userUseCase) RegisterUser(ctx context.Context, req RegisterUserRequest) error {
 	// 如果开启邮箱验证，则校验邮箱和验证码
-	if config.GetAuthenticationConfig().EmailVerificationEnabled {
+	if dyncfg.EmailVerificationEnabled {
 		if req.Email == "" || req.VerificationCode == "" {
 			return errors.New("管理员开启了邮箱验证，请输入邮箱地址和验证码")
 		}
@@ -40,7 +40,7 @@ func (uc *userUseCase) RegisterUser(ctx context.Context, req RegisterUserRequest
 		AccessToken: random.GetUUID(),
 	}
 	// 如果开启邮箱验证，则设置邮箱
-	if config.GetAuthenticationConfig().EmailVerificationEnabled {
+	if dyncfg.EmailVerificationEnabled {
 		newUser.Email = req.Email
 	}
 
@@ -320,3 +320,7 @@ func (uc *userUseCase) GetAffCode(ctx context.Context, userID int) (string, erro
 	}
 	return user.AffCode, nil
 }
+
+// func (uc *userUseCase) ResetUserPasswordByEmail(ctx context.Context, email string, token string) error {
+
+// }

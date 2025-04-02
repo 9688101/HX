@@ -72,3 +72,8 @@ type ManageRequest struct {
 	Username string `json:"username" binding:"required"`
 	Action   string `json:"action" binding:"required"`
 }
+
+type PasswordResetRequest struct {
+	Email string `json:"email"`
+	Token string `json:"token"`
+}
