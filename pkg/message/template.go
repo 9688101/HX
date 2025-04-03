@@ -30,5 +30,5 @@ func EmailTemplate(title, content string) string {
     </div>
 </body>
 </html>
-`, title, content, config.GetSystemConfig().SystemName)
+`, title, content, config.GetServerConfig().SystemName)
 }

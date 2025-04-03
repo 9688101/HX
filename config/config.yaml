@@ -12,6 +12,8 @@ server:
   address: "0.0.0.0"
   port: 3000
   only_one_log_file: false
+  gin_mode: "release"
+
 
 authentication:
   password_login_enabled: true

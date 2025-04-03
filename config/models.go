@@ -4,39 +4,53 @@ import "time"
 
 // Config 配置.
 type Config struct {
-	SystemConfig         *SystemConfig         `mapstructure:"system" yaml:"system"`
-	ServerConfig         *ServerConfig         `mapstructure:"server" yaml:"server"`
-	AuthenticationConfig *AuthenticationConfig `mapstructure:"authentication" yaml:"authentication"`
-	DebugConfig          *DebugConfig          `mapstructure:"debug" yaml:"debug"`
-	SMTPConfig           *SMTPConfig           `mapstructure:"smtp" yaml:"smtp"`
-	OAuthConfig          *OAuthConfig          `mapstructure:"oauth" yaml:"oauth"`
-	WeChatConfig         *WeChatConfig         `mapstructure:"wechat" yaml:"wechat"`
-	MessageConfig        *MessageConfig        `mapstructure:"message" yaml:"message"`
-	TurnstileConfig      *TurnstileConfig      `mapstructure:"turnstile" yaml:"turnstile"`
-	RateLimitConfig      *RateLimitConfig      `mapstructure:"rate_limit" yaml:"rate_limit"`
-	GeneralConfig        *GeneralConfig        `mapstructure:"general" yaml:"general"`
-	RedisConfig          *RedisConfig          `mapstructure:"redis" yaml:"redis"` // Redis 配置保持为指针类型，并使用 "redis" 标签
-	DatabaseConfig       *DatabaseConfig       `mapstructure:"database" yaml:"database"`
+	// SystemConfig         *SystemConfig         `mapstructure:"system" yaml:"system"`
+	ServerConfig *ServerConfig `mapstructure:"server" yaml:"server"`
+	// AuthenticationConfig *AuthenticationConfig `mapstructure:"authentication" yaml:"authentication"`
+	DebugConfig *DebugConfig `mapstructure:"debug" yaml:"debug"`
+	// SMTPConfig           *SMTPConfig           `mapstructure:"smtp" yaml:"smtp"`
+	// OAuthConfig          *OAuthConfig          `mapstructure:"oauth" yaml:"oauth"`
+	// WeChatConfig         *WeChatConfig         `mapstructure:"wechat" yaml:"wechat"`
+	// MessageConfig        *MessageConfig        `mapstructure:"message" yaml:"message"`
+	// TurnstileConfig      *TurnstileConfig      `mapstructure:"turnstile" yaml:"turnstile"`
+	RateLimitConfig *RateLimitConfig `mapstructure:"rate_limit" yaml:"rate_limit"`
+	GeneralConfig   *GeneralConfig   `mapstructure:"general" yaml:"general"`
+	RedisConfig     *RedisConfig     `mapstructure:"redis" yaml:"redis"` // Redis 配置保持为指针类型，并使用 "redis" 标签
+	DatabaseConfig  *DatabaseConfig  `mapstructure:"database" yaml:"database"`
+	MailConfig      *MailConfig      `mapstructure:"mail" yaml:"mail"`
+}
+
+// MailConfig 定义邮件发送的配置
+type MailConfig struct {
+	Provider    string // 邮件服务提供商标识，如 "smtp"，未来可扩展其他如 sendgrid、aliyun 等
+	SMTPAccount string // SMTP 账号
+	SMTPToken   string // SMTP 口令/Token
+	SMTPServer  string // SMTP 服务器地址
+	SMTPPort    int    // SMTP 服务器端口
+	SMTPFrom    string // 发件人邮箱地址
 }
 
 // 系统配置
-type SystemConfig struct {
-	SystemName      string `mapstructure:"system_name" yaml:"system_name"`
-	Notice          string `mapstructure:"notice" yaml:"notice"`
-	About           string `mapstructure:"about" yaml:"about"`
-	HomePageContent string `mapstructure:"home_page_content" yaml:"home_page_content"`
-	Footer          string `mapstructure:"footer" yaml:"footer"`
-	Logo            string `mapstructure:"logo" yaml:"logo"`
-	Theme           string `mapstructure:"theme" yaml:"theme"`
-	Version         string `mapstructure:"version" yaml:"version"`
-}
+// type SystemConfig struct {
+// 	SystemName      string `mapstructure:"system_name" yaml:"system_name"`
+// 	Notice          string `mapstructure:"notice" yaml:"notice"`
+// 	About           string `mapstructure:"about" yaml:"about"`
+// 	HomePageContent string `mapstructure:"home_page_content" yaml:"home_page_content"`
+// 	Footer          string `mapstructure:"footer" yaml:"footer"`
+// 	Logo            string `mapstructure:"logo" yaml:"logo"`
+// 	Theme           string `mapstructure:"theme" yaml:"theme"`
+// 	Version         string `mapstructure:"version" yaml:"version"`
+// }
 
 // 服务器配置
 type ServerConfig struct {
 	Address        string `mapstructure:"address"`
 	Port           int    `mapstructure:"port"`
 	StartTime      time.Time
-	OnlyOneLogFile bool `mapstructure:"only_one_log_file"`
+	SessionSecret  string `mapstructure:"session_secret" yaml:"session_secret"`
+	OnlyOneLogFile bool   `mapstructure:"only_one_log_file"`
+	SystemName     string `mapstructure:"system_name" yaml:"system_name"`
+	GINMode        string `mapstructure:"gin_mode" yaml:"gin_mode"`
 }
 
 // reids 配置
@@ -70,8 +84,8 @@ type DebugConfig struct {
 type GeneralConfig struct {
 	InitialRootToken       string `mapstructure:"initial_root_token" yaml:"initial_root_token"`
 	InitialRootAccessToken string `mapstructure:"initial_root_access_token" yaml:"initial_root_access_token"`
-	RootUserEmail          string `mapstructure:"root_user_email" yaml:"root_user_email"`
-	SyncFrequency          int    `mapstructure:"sync_frequency" yaml:"sync_frequency"`
+	// RootUserEmail          string `mapstructure:"root_user_email" yaml:"root_user_email"`
+	SyncFrequency int `mapstructure:"sync_frequency" yaml:"sync_frequency"`
 }
 
 // 限流配置
@@ -90,58 +104,57 @@ type RateLimitConfig struct {
 }
 
 // 消息配置
-type MessageConfig struct {
-	MessagePusherAddress string `mapstructure:"message_pusher_address" yaml:"message_pusher_address"`
-	MessagePusherToken   string `mapstructure:"message_pusher_token" yaml:"message_pusher_token"`
-}
+// type MessageConfig struct {
+// 	MessagePusherAddress string `mapstructure:"message_pusher_address" yaml:"message_pusher_address"`
+// 	MessagePusherToken   string `mapstructure:"message_pusher_token" yaml:"message_pusher_token"`
+// }
 
 // 认证配置
-type AuthenticationConfig struct {
-	PasswordLoginEnabled          bool     `mapstructure:"password_login_enabled" yaml:"password_login_enabled"`
-	PasswordRegisterEnabled       bool     `mapstructure:"password_register_enabled" yaml:"password_register_enabled"`
-	EmailVerificationEnabled      bool     `mapstructure:"email_verification_enabled" yaml:"email_verification_enabled"`
-	GitHubOAuthEnabled            bool     `mapstructure:"github_oauth_enabled" yaml:"github_oauth_enabled"`
-	OidcEnabled                   bool     `mapstructure:"oidc_enabled" yaml:"oidc_enabled"`
-	WeChatAuthEnabled             bool     `mapstructure:"wechat_auth_enabled" yaml:"wechat_auth_enabled"`
-	TurnstileCheckEnabled         bool     `mapstructure:"turnstile_check_enabled" yaml:"turnstile_check_enabled"`
-	RegisterEnabled               bool     `mapstructure:"register_enabled" yaml:"register_enabled"`
-	EmailDomainRestrictionEnabled bool     `mapstructure:"email_domain_restriction_enabled" yaml:"email_domain_restriction_enabled"`
-	EmailDomainWhitelist          []string `mapstructure:"email_domain_whitelist" yaml:"email_domain_whitelist"`
-	SessionSecret                 string   `mapstructure:"session_secret" yaml:"session_secret"`
-}
+// type AuthenticationConfig struct {
+// 	PasswordLoginEnabled          bool     `mapstructure:"password_login_enabled" yaml:"password_login_enabled"`
+// 	PasswordRegisterEnabled       bool     `mapstructure:"password_register_enabled" yaml:"password_register_enabled"`
+// 	EmailVerificationEnabled      bool     `mapstructure:"email_verification_enabled" yaml:"email_verification_enabled"`
+// 	GitHubOAuthEnabled            bool     `mapstructure:"github_oauth_enabled" yaml:"github_oauth_enabled"`
+// 	OidcEnabled                   bool     `mapstructure:"oidc_enabled" yaml:"oidc_enabled"`
+// 	WeChatAuthEnabled             bool     `mapstructure:"wechat_auth_enabled" yaml:"wechat_auth_enabled"`
+// 	TurnstileCheckEnabled         bool     `mapstructure:"turnstile_check_enabled" yaml:"turnstile_check_enabled"`
+// 	RegisterEnabled               bool     `mapstructure:"register_enabled" yaml:"register_enabled"`
+// 	EmailDomainRestrictionEnabled bool     `mapstructure:"email_domain_restriction_enabled" yaml:"email_domain_restriction_enabled"`
+// 	EmailDomainWhitelist          []string `mapstructure:"email_domain_whitelist" yaml:"email_domain_whitelist"`
+// }
 
 // OAuth 配置
-type OAuthConfig struct {
-	GitHubClientId            string `mapstructure:"github_client_id" yaml:"github_client_id"`
-	GitHubClientSecret        string `mapstructure:"github_client_secret" yaml:"github_client_secret"`
-	LarkClientId              string `mapstructure:"lark_client_id" yaml:"lark_client_id"`
-	LarkClientSecret          string `mapstructure:"lark_client_secret" yaml:"lark_client_secret"`
-	OidcClientId              string `mapstructure:"oidc_client_id" yaml:"oidc_client_id"`
-	OidcClientSecret          string `mapstructure:"oidc_client_secret" yaml:"oidc_client_secret"`
-	OidcWellKnown             string `mapstructure:"oidc_well_known" yaml:"oidc_well_known"`
-	OidcAuthorizationEndpoint string `mapstructure:"oidc_authorization_endpoint" yaml:"oidc_authorization_endpoint"`
-	OidcTokenEndpoint         string `mapstructure:"oidc_token_endpoint" yaml:"oidc_token_endpoint"`
-	OidcUserinfoEndpoint      string `mapstructure:"oidc_userinfo_endpoint" yaml:"oidc_userinfo_endpoint"`
-}
+// type OAuthConfig struct {
+// 	GitHubClientId            string `mapstructure:"github_client_id" yaml:"github_client_id"`
+// 	GitHubClientSecret        string `mapstructure:"github_client_secret" yaml:"github_client_secret"`
+// 	LarkClientId              string `mapstructure:"lark_client_id" yaml:"lark_client_id"`
+// 	LarkClientSecret          string `mapstructure:"lark_client_secret" yaml:"lark_client_secret"`
+// 	OidcClientId              string `mapstructure:"oidc_client_id" yaml:"oidc_client_id"`
+// 	OidcClientSecret          string `mapstructure:"oidc_client_secret" yaml:"oidc_client_secret"`
+// 	OidcWellKnown             string `mapstructure:"oidc_well_known" yaml:"oidc_well_known"`
+// 	OidcAuthorizationEndpoint string `mapstructure:"oidc_authorization_endpoint" yaml:"oidc_authorization_endpoint"`
+// 	OidcTokenEndpoint         string `mapstructure:"oidc_token_endpoint" yaml:"oidc_token_endpoint"`
+// 	OidcUserinfoEndpoint      string `mapstructure:"oidc_userinfo_endpoint" yaml:"oidc_userinfo_endpoint"`
+// }
 
 // 微信配置
-type WeChatConfig struct {
-	WeChatServerAddress         string `mapstructure:"wechat_server_address" yaml:"wechat_server_address"`
-	WeChatServerToken           string `mapstructure:"wechat_server_token" yaml:"wechat_server_token"`
-	WeChatAccountQRCodeImageURL string `mapstructure:"wechat_account_qr_code_image_url" yaml:"wechat_account_qr_code_image_url"`
-}
+// type WeChatConfig struct {
+// 	WeChatServerAddress         string `mapstructure:"wechat_server_address" yaml:"wechat_server_address"`
+// 	WeChatServerToken           string `mapstructure:"wechat_server_token" yaml:"wechat_server_token"`
+// 	WeChatAccountQRCodeImageURL string `mapstructure:"wechat_account_qr_code_image_url" yaml:"wechat_account_qr_code_image_url"`
+// }
 
 // SMTP 配置
-type SMTPConfig struct {
-	SMTPServer  string `mapstructure:"smtp_server" yaml:"smtp_server"`
-	SMTPPort    int    `mapstructure:"smtp_port" yaml:"smtp_port"`
-	SMTPAccount string `mapstructure:"smtp_account" yaml:"smtp_account"`
-	SMTPFrom    string `mapstructure:"smtp_from" yaml:"smtp_from"`
-	SMTPToken   string `mapstructure:"smtp_token" yaml:"smtp_token"`
-}
+// type SMTPConfig struct {
+// 	SMTPServer  string `mapstructure:"smtp_server" yaml:"smtp_server"`
+// 	SMTPPort    int    `mapstructure:"smtp_port" yaml:"smtp_port"`
+// 	SMTPAccount string `mapstructure:"smtp_account" yaml:"smtp_account"`
+// 	SMTPFrom    string `mapstructure:"smtp_from" yaml:"smtp_from"`
+// 	SMTPToken   string `mapstructure:"smtp_token" yaml:"smtp_token"`
+// }
 
 // 验证码配置
-type TurnstileConfig struct {
-	TurnstileSiteKey   string `mapstructure:"turnstile_site_key" yaml:"turnstile_site_key"`
-	TurnstileSecretKey string `mapstructure:"turnstile_secret_key" yaml:"turnstile_secret_key"`
-}
+// type TurnstileConfig struct {
+// 	TurnstileSiteKey   string `mapstructure:"turnstile_site_key" yaml:"turnstile_site_key"`
+// 	TurnstileSecretKey string `mapstructure:"turnstile_secret_key" yaml:"turnstile_secret_key"`
+// }

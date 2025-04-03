@@ -50,8 +50,8 @@ func InitConfig() error {
 	}
 
 	// Generate default session secret if not provided
-	if GlobalConfig.AuthenticationConfig.SessionSecret == "" {
-		GlobalConfig.AuthenticationConfig.SessionSecret = uuid.New().String()
+	if GlobalConfig.ServerConfig.SessionSecret == "" {
+		GlobalConfig.ServerConfig.SessionSecret = uuid.New().String()
 	}
 	// configData := viper.AllSettings()
 

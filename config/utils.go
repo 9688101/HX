@@ -13,11 +13,24 @@ import (
 func SetConfigValue(key string, value interface{}) {
 	viper.Set(key, value)
 	// Optionally update the global Cfg struct if needed
-	if strings.Contains(key, "system") {
-		viper.UnmarshalKey("system", &GlobalConfig.SystemConfig)
-	} else if strings.Contains(key, "server") {
+	if strings.Contains(key, "server") {
 		viper.UnmarshalKey("server", &GlobalConfig.ServerConfig)
-	} // Add more conditions for other config sections
+	}
+	if strings.Contains(key, "redis") {
+		viper.UnmarshalKey("redis", &GlobalConfig.RedisConfig)
+	}
+	if strings.Contains(key, "database") {
+		viper.UnmarshalKey("database", &GlobalConfig.DatabaseConfig)
+	}
+	if strings.Contains(key, "debug") {
+		viper.UnmarshalKey("debug", &GlobalConfig.DebugConfig)
+	}
+	if strings.Contains(key, "general") {
+		viper.UnmarshalKey("general", &GlobalConfig.GeneralConfig)
+	}
+	if strings.Contains(key, "rate_limit") {
+		viper.UnmarshalKey("rate_limit", &GlobalConfig.RateLimitConfig)
+	}
 }
 
 // GetViperInstance returns the underlying viper instance for more advanced operations.

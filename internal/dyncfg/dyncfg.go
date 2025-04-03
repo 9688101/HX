@@ -35,7 +35,7 @@ var EmailDomainRestrictionEnabled = true
 
 // 数据
 var SystemName = "晖雄 AI"
-var ServerAddress = "http://localhost:3000"
+var ServerAddress = ""
 var Footer = ""
 var Logo = ""
 var HomePageContent = ""

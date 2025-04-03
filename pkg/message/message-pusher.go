@@ -23,31 +23,35 @@ type response struct {
 	Message string `json:"message"`
 }
 
-func SendMessage(title string, description string, content string) error {
-	cfg := config.GetMessageConfig()
-	if cfg.MessagePusherAddress == "" {
+func SendMessage(title, description, content string) error {
+	cfg := config.GetMailConfig()
+	if cfg.SMTPFrom == "" {
 		return errors.New("message pusher address is not set")
 	}
+
 	req := request{
 		Title:       title,
 		Description: description,
 		Content:     content,
-		Token:       cfg.MessagePusherToken,
+		Token:       cfg.SMTPToken,
 	}
+
 	data, err := json.Marshal(req)
 	if err != nil {
 		return err
 	}
-	resp, err := http.Post(cfg.MessagePusherAddress,
-		"application/json", bytes.NewBuffer(data))
+
+	resp, err := http.Post(cfg.SMTPFrom, "application/json", bytes.NewBuffer(data))
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
+
 	var res response
-	err = json.NewDecoder(resp.Body).Decode(&res)
-	if err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
 		return err
 	}
+
 	if !res.Success {
 		return errors.New(res.Message)
 	}

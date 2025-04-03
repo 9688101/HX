@@ -1,11 +1,11 @@
 package app
 
 import (
-	"flag"
 	"fmt"
-	"log"
-	"os"
-	"path/filepath"
+	"runtime"
+	"time"
+
+	"github.com/fatih/color"
 
 	"github.com/9688101/HX/config"
 	"github.com/9688101/HX/internal/entity"
@@ -13,6 +13,12 @@ import (
 	"github.com/9688101/HX/pkg/logger"
 	"github.com/9688101/HX/pkg/random"
 	"github.com/9688101/HX/pkg/utils"
+)
+
+// 定义常量
+const (
+	appName    = "HX"     // 应用程序名称
+	appVersion = "v1.0.0" // 版本号
 )
 
 func CreateRootAccountIfNeed() error {
@@ -44,49 +50,42 @@ func CreateRootAccountIfNeed() error {
 }
 
 func start() {
-	flag.Parse()
+	// 获取当前时间
+	startTime := time.Now().Format("2006-01-02 15:04:05")
 
-	if *PrintVersion {
-		os.Exit(0)
-	}
+	// 获取运行时环境信息
+	goVersion := runtime.Version() // Go 版本
+	os := runtime.GOOS             // 操作系统
+	arch := runtime.GOARCH         // 架构
 
-	if *PrintHelp {
-		printHelp()
-		os.Exit(0)
-	}
+	// 模拟配置信息和服务端口
+	configPath := "/path/to/config.yaml" // 配置文件路径
+	listenPort := 8080                   // 服务监听端口
 
-	if os.Getenv("SESSION_SECRET") != "" {
-		if os.Getenv("SESSION_SECRET") == "random_string" {
-			logger.SysError("SESSION_SECRET is set to an example value, please change it to a random string.")
-		} else {
-			config.GetAuthenticationConfig().SessionSecret = os.Getenv("SESSION_SECRET")
-		}
+	// 显示启动动画
+	fmt.Println(color.CyanString("正在启动 %s %s...", appName, appVersion))
+	for i := 0; i < 20; i++ {
+		fmt.Print(color.YellowString("█"))
+		time.Sleep(200 * time.Millisecond) // 每隔200毫秒显示一个方块
 	}
-	if *LogDir != "" {
-		var err error
-		*LogDir, err = filepath.Abs(*LogDir)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if _, err := os.Stat(*LogDir); os.IsNotExist(err) {
-			err = os.Mkdir(*LogDir, 0777)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-		logger.LogDir = *LogDir
-	}
+	fmt.Println()
+
+	// 显示启动信息
+	color.Green("╔════════════════════════════════════════════════╗")
+	color.Green("║          %s %s            ║", appName, appVersion)
+	color.Green("╚════════════════════════════════════════════════╝")
+	color.Blue("启动时间: %s", startTime)
+	color.Blue("运行环境:")
+	color.Magenta("  - 操作系统: %s", os)
+	color.Magenta("  - 架构: %s", arch)
+	color.Magenta("  - Go 版本: %s", goVersion)
+	color.Blue("配置文件: %s", configPath)
+	color.Blue("服务监听端口: %d", listenPort)
+	color.Green("══════════════════════════════════════════════════")
+	color.Cyan("欢迎使用 %s！", appName)
 }
 
-var (
-	Port         = flag.Int("port", 3000, "the listening port")
-	PrintVersion = flag.Bool("version", false, "print version and exit")
-	PrintHelp    = flag.Bool("help", false, "print help and exit")
-	LogDir       = flag.String("log-dir", "./logs", "specify the log directory")
-)
-
-func printHelp() {
-	fmt.Println("Copyright (C) 2023 JustSong. All rights reserved.")
-	fmt.Println("GitHub: https://github.com/songquanpeng/one-api")
-	fmt.Println("Usage: one-api [--port <port>] [--log-dir <log directory>] [--version] [--help]")
+func init() {
+	// 启用颜色输出
+	color.NoColor = false
 }
