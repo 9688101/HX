@@ -7,9 +7,9 @@ import (
 
 	"github.com/9688101/HX/internal/dyncfg"
 	"github.com/9688101/HX/internal/entity"
-	"github.com/9688101/HX/pkg"
+	"github.com/9688101/HX/pkg/helper"
 	"github.com/9688101/HX/pkg/random"
-	"github.com/9688101/HX/pkg/utils"
+	"github.com/9688101/HX/pkg/verif"
 )
 
 // 注册
@@ -19,7 +19,7 @@ func (uc *userUseCase) RegisterUser(ctx context.Context, req RegisterUserRequest
 		if req.Email == "" || req.VerificationCode == "" {
 			return errors.New("管理员开启了邮箱验证，请输入邮箱地址和验证码")
 		}
-		if !pkg.VerifyCodeWithKey(req.Email, req.VerificationCode, pkg.EmailVerificationPurpose) {
+		if !verif.VerifyCodeWithKey(req.Email, req.VerificationCode, verif.EmailVerificationPurpose) {
 			return errors.New("验证码错误或已过期")
 		}
 	}
@@ -60,7 +60,7 @@ func (uc *userUseCase) Login(ctx context.Context, username, password string) (*e
 	}
 
 	// 使用 pkg 包中的方法验证密码（假设 user.Password 为加密后密码）
-	if !utils.ValidatePasswordAndHash(password, user.Password) {
+	if !helper.ValidatePasswordAndHash(password, user.Password) {
 		return nil, errors.New("用户名或密码错误")
 	}
 
@@ -113,7 +113,7 @@ func (uc *userUseCase) UpdateSelf(ctx context.Context, req UpdateSelfRequest, us
 	// 处理密码：若密码为空或为占位值，则不更新密码
 	updatePassword := false
 	if req.Password != "" && req.Password != "$I_LOVE_U" {
-		hashedPwd, err := utils.Password2Hash(req.Password)
+		hashedPwd, err := helper.Password2Hash(req.Password)
 		if err != nil {
 			return err
 		}
@@ -169,7 +169,7 @@ func (uc *userUseCase) UpdateUser(ctx context.Context, req UpdateUserRequest, ca
 
 	// 处理密码更新：如果密码为 "$I_LOVE_U"，视为不更新密码
 	if req.Password != "" && req.Password != "$I_LOVE_U" {
-		hashedPwd, err := utils.Password2Hash(req.Password)
+		hashedPwd, err := helper.Password2Hash(req.Password)
 		if err != nil {
 			return err
 		}
@@ -264,7 +264,7 @@ func (uc *userUseCase) ManageUser(ctx context.Context, req ManageRequest, caller
 // BindEmail 实现邮箱绑定业务逻辑
 func (uc *userUseCase) BindEmail(ctx context.Context, email string, code string, userID int) error {
 	// 验证验证码
-	if !pkg.VerifyCodeWithKey(email, code, pkg.EmailVerificationPurpose) {
+	if !verif.VerifyCodeWithKey(email, code, verif.EmailVerificationPurpose) {
 		return errors.New("验证码错误或已过期")
 	}
 	// 查询用户信息（不返回敏感数据）

@@ -6,13 +6,13 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"gorm.io/gorm"
 
 	"github.com/9688101/HX/config"
 	"github.com/9688101/HX/internal/entity"
-	"github.com/9688101/HX/pkg/db"
+	"github.com/9688101/HX/pkg/helper"
 	"github.com/9688101/HX/pkg/logger"
 	"github.com/9688101/HX/pkg/random"
-	"github.com/9688101/HX/pkg/utils"
 )
 
 // 定义常量
@@ -21,12 +21,12 @@ const (
 	appVersion = "v1.0.0" // 版本号
 )
 
-func CreateRootAccountIfNeed() error {
+func CreateRootAccountIfNeed(db *gorm.DB) error {
 	var user entity.User
 	//if user.Status != util.UserStatusEnabled {
-	if err := db.DB.First(&user).Error; err != nil {
+	if err := db.First(&user).Error; err != nil {
 		logger.SysLog("no user exists, creating a root user for you: username is root, password is 123456")
-		hashedPassword, err := utils.Password2Hash("123456")
+		hashedPassword, err := helper.Password2Hash("123456")
 		if err != nil {
 			return err
 		}
@@ -43,12 +43,10 @@ func CreateRootAccountIfNeed() error {
 			AccessToken: accessToken,
 			AffCode:     random.GetRandomString(4),
 		}
-		db.DB.Create(&rootUser)
-		return nil
+		db.Create(&rootUser)
 	}
 	return nil
 }
-
 func start() {
 	// 获取当前时间
 	startTime := time.Now().Format("2006-01-02 15:04:05")

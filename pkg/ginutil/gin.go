@@ -1,4 +1,4 @@
-package pkg
+package ginutil
 
 import (
 	"bytes"
@@ -6,12 +6,12 @@ import (
 	"io"
 	"strings"
 
-	"github.com/9688101/HX/pkg/ctxkey"
+	"github.com/9688101/HX/pkg/consts"
 	"github.com/gin-gonic/gin"
 )
 
 func GetRequestBody(c *gin.Context) ([]byte, error) {
-	requestBody, _ := c.Get(ctxkey.KeyRequestBody)
+	requestBody, _ := c.Get(consts.KeyRequestBody)
 	if requestBody != nil {
 		return requestBody.([]byte), nil
 	}
@@ -20,7 +20,7 @@ func GetRequestBody(c *gin.Context) ([]byte, error) {
 		return nil, err
 	}
 	_ = c.Request.Body.Close()
-	c.Set(ctxkey.KeyRequestBody, requestBody)
+	c.Set(consts.KeyRequestBody, requestBody)
 	return requestBody.([]byte), nil
 }
 

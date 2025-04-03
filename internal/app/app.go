@@ -9,7 +9,7 @@ import (
 	v1 "github.com/9688101/HX/internal/controller/http"
 	"github.com/9688101/HX/internal/entity"
 	"github.com/9688101/HX/internal/middleware"
-	"github.com/9688101/HX/pkg/db"
+	"github.com/9688101/HX/pkg/database"
 	"github.com/9688101/HX/pkg/i18n"
 	"github.com/9688101/HX/pkg/logger"
 	"github.com/9688101/HX/pkg/redis"
@@ -25,27 +25,28 @@ func Run(buildFS embed.FS) {
 	if cfg.ServerConfig.GINMode != gin.DebugMode {
 		gin.SetMode(gin.ReleaseMode)
 	}
-	if cfg.DebugConfig.DebugEnabled {
+	if cfg.GeneralConfig.DebugEnabled {
 		logger.SysLog("running in debug mode")
 	}
 
 	// Initialize SQL Database
-	db.InitDB()
-	entity.MigrateDB(db.DB)
+	database.InitDB(cfg.DatabaseConfig)
+	db := database.GetDB()
+	entity.MigrateDB(db)
 	var err error
-	err = CreateRootAccountIfNeed()
+	err = CreateRootAccountIfNeed(db)
 	if err != nil {
 		logger.FatalLog("database init error: " + err.Error())
 	}
 	defer func() {
-		err := db.CloseDB(db.DB)
+		err := database.CloseDB(db)
 		if err != nil {
 			logger.FatalLog("failed to close database: " + err.Error())
 		}
 	}()
 
 	// Initialize Redis
-	err = redis.InitRedisClient()
+	err = redis.InitRedisClient(cfg.RedisConfig)
 	if err != nil {
 		logger.FatalLog("failed to initialize Redis: " + err.Error())
 	}

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"runtime/debug"
 
-	"github.com/9688101/HX/pkg"
+	"github.com/9688101/HX/pkg/ginutil"
 	"github.com/9688101/HX/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +18,7 @@ func RelayPanicRecover() gin.HandlerFunc {
 				logger.Errorf(ctx, fmt.Sprintf("panic detected: %v", err))
 				logger.Errorf(ctx, fmt.Sprintf("stacktrace from panic: %s", string(debug.Stack())))
 				logger.Errorf(ctx, fmt.Sprintf("request: %s %s", c.Request.Method, c.Request.URL.Path))
-				body, _ := pkg.GetRequestBody(c)
+				body, _ := ginutil.GetRequestBody(c)
 				logger.Errorf(ctx, fmt.Sprintf("request body: %s", string(body)))
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error": gin.H{

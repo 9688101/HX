@@ -1,4 +1,4 @@
-package message
+package email
 
 const (
 	ByAll           = "all"

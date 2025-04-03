@@ -22,9 +22,6 @@ func SetConfigValue(key string, value interface{}) {
 	if strings.Contains(key, "database") {
 		viper.UnmarshalKey("database", &GlobalConfig.DatabaseConfig)
 	}
-	if strings.Contains(key, "debug") {
-		viper.UnmarshalKey("debug", &GlobalConfig.DebugConfig)
-	}
 	if strings.Contains(key, "general") {
 		viper.UnmarshalKey("general", &GlobalConfig.GeneralConfig)
 	}

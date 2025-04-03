@@ -33,11 +33,6 @@ func GetRedisConfig() *RedisConfig {
 	return GlobalConfig.RedisConfig
 }
 
-// GetDebugConfig returns the debug configuration.
-func GetDebugConfig() *DebugConfig {
-	return GlobalConfig.DebugConfig
-}
-
 func GetMailConfig() *MailConfig {
 	return GlobalConfig.MailConfig
 }

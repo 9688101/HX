@@ -13,7 +13,7 @@ import (
 )
 
 func SetRouter(r *gin.Engine, buildFS embed.FS) {
-	SetupUserRouter(r)
+	SetApiRouter(r)
 	frontendBaseUrl := os.Getenv("FRONTEND_BASE_URL")
 	if config.GetDatabaseConfig().IsMasterNode && frontendBaseUrl != "" {
 		frontendBaseUrl = ""

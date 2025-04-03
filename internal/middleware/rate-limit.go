@@ -7,14 +7,14 @@ import (
 	"time"
 
 	"github.com/9688101/HX/config"
-	"github.com/9688101/HX/pkg"
 	"github.com/9688101/HX/pkg/redis"
+	"github.com/9688101/HX/pkg/rl"
 	"github.com/gin-gonic/gin"
 )
 
 var timeFormat = "2006-01-02T15:04:05.000Z"
 
-var inMemoryRateLimiter pkg.InMemoryRateLimiter
+var inMemoryRateLimiter rl.InMemoryRateLimiter
 
 func redisRateLimiter(c *gin.Context, maxRequestNum int, duration int64, mark string) {
 	ctx := context.Background()
@@ -73,7 +73,7 @@ func memoryRateLimiter(c *gin.Context, maxRequestNum int, duration int64, mark s
 }
 
 func rateLimitFactory(maxRequestNum int, duration int64, mark string) func(c *gin.Context) {
-	if maxRequestNum == 0 || config.GetDebugConfig().DebugEnabled {
+	if maxRequestNum == 0 || config.GetGeneralConfig().DebugEnabled {
 		return func(c *gin.Context) {
 			c.Next()
 		}

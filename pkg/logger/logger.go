@@ -34,7 +34,7 @@ func SetupLogger() {
 	setupLogOnce.Do(func() {
 		if LogDir != "" {
 			var logPath string
-			if config.GetServerConfig().OnlyOneLogFile {
+			if config.GetGeneralConfig().OnlyOneLogFile {
 				logPath = filepath.Join(LogDir, "HX.log")
 			} else {
 				logPath = filepath.Join(LogDir, fmt.Sprintf("HX-%s.log", time.Now().Format("20060102")))
@@ -74,7 +74,7 @@ func SysErrorf(format string, a ...any) {
 }
 
 func Debug(ctx context.Context, msg string) {
-	if !config.GetDebugConfig().DebugEnabled {
+	if !config.GetGeneralConfig().DebugEnabled {
 		return
 	}
 	logHelper(ctx, loggerDEBUG, msg)
@@ -93,7 +93,7 @@ func Error(ctx context.Context, msg string) {
 }
 
 func Debugf(ctx context.Context, format string, a ...any) {
-	if !config.GetDebugConfig().DebugEnabled {
+	if !config.GetGeneralConfig().DebugEnabled {
 		return
 	}
 	logHelper(ctx, loggerDEBUG, fmt.Sprintf(format, a...))

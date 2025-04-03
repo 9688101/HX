@@ -10,24 +10,21 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-var RedisEnabled = true
-var RDB redis.UniversalClient // Changed to interface type
-
-func InitRedisClient() (err error) {
-	cfg := config.GetRedisConfig()
+// InitRedisClient 初始化 Redis 客户端
+func InitRedisClient(cfg *config.RedisConfig) error {
 	if cfg.RedisConnString == "" {
 		RedisEnabled = false
 		logger.SysLog("REDIS_CONN_STRING not set, Redis is not enabled")
 		return nil
 	}
-	if cfg.SyncFrequency == "" { // Corrected: Check for empty string
+	if cfg.SyncFrequency == "" {
 		RedisEnabled = false
 		logger.SysLog("SYNC_FREQUENCY not set, Redis is disabled")
 		return nil
 	}
 
 	url := cfg.RedisConnString
-	logger.SysLog("Redis is enabled") // Moved log message
+	logger.SysLog("Redis is enabled")
 
 	if cfg.RedisMasterName == "" {
 		// Standalone mode
@@ -46,14 +43,15 @@ func InitRedisClient() (err error) {
 			Addrs:      addrs,
 			Password:   cfg.RedisPassword,
 			MasterName: cfg.RedisMasterName,
-			DB:         cfg.Database, // Added: Use Database from config
+			DB:         cfg.Database,
 		})
 	}
 
+	// Test Redis connection
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err = RDB.Ping(ctx).Result()
+	_, err := RDB.Ping(ctx).Result()
 	if err != nil {
 		logger.FatalLog("Redis ping test failed: " + err.Error())
 		return err
@@ -61,15 +59,14 @@ func InitRedisClient() (err error) {
 	return nil
 }
 
-// ParseRedisOption function is redundant and can be removed.
-// The logic is now within InitRedisClient.
-
-func RedisSet(key string, value string, expiration time.Duration) error {
+// RedisSet 设置 Redis 键值对
+func Set(key string, value string, expiration time.Duration) error {
 	ctx := context.Background()
 	return RDB.Set(ctx, key, value, expiration).Err()
 }
 
-func RedisGet(key string) (string, error) {
+// RedisGet 获取 Redis 键的值
+func Get(key string) (string, error) {
 	ctx := context.Background()
 	result, err := RDB.Get(ctx, key).Result()
 	if err == redis.Nil {
@@ -78,12 +75,14 @@ func RedisGet(key string) (string, error) {
 	return result, err
 }
 
-func RedisDel(key string) error {
+// RedisDel 删除 Redis 键
+func Del(key string) error {
 	ctx := context.Background()
 	return RDB.Del(ctx, key).Err()
 }
 
-func RedisDecrease(key string, value int64) error {
+// RedisDecrease Redis 键值递减
+func Decrease(key string, value int64) error {
 	ctx := context.Background()
 	return RDB.DecrBy(ctx, key, value).Err()
 }

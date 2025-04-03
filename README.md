@@ -22,13 +22,11 @@ go build -ldflags "-s -w" -o HX
 HX/
 ├── cmd/                    # 命令行入口
 ├── config/                 # 配置文件
-│   ├── auth.go            # 认证配置
 │   ├── config.go          # 配置核心
 │   ├── db.go              # 数据库配置
 │   ├── defaults.go        # 默认配置
 │   ├── loader.go          # 配置加载器
-│   ├── server.go          # 服务器配置
-│   ├── system.go          # 系统配置
+│   ├── models.go          # 配置模型
 │   ├── utils.go           # 工具函数
 │   └── validator.go       # 配置验证器
 ├── docs/                   # 文档
@@ -38,10 +36,8 @@ HX/
 │   ├── controller/        # HTTP 控制器
 │   │   └── http/         # HTTP 相关控制器
 │   ├── entity/           # 实体定义
-│   │   ├── channel.go    # 渠道实体
 │   │   ├── message.go    # 消息实体
 │   │   ├── option.go     # 选项实体
-│   │   ├── quota.go      # 配额实体
 │   │   └── user.go       # 用户实体
 │   ├── middleware/       # 中间件
 │   │   ├── auth.go       # 认证中间件
@@ -50,16 +46,10 @@ HX/
 │   │   ├── logger.go     # 日志中间件
 │   │   └── requestid.go  # 请求ID中间件
 │   ├── repo/             # 数据仓库层
-│   │   ├── channel.go    # 渠道仓库
-│   │   ├── message.go    # 消息仓库
 │   │   ├── option.go     # 选项仓库
-│   │   ├── quota.go      # 配额仓库
 │   │   └── user.go       # 用户仓库
 │   └── usecase/          # 用例层
-│       ├── channel.go    # 渠道用例
-│       ├── message.go    # 消息用例
 │       ├── option.go     # 选项用例
-│       ├── quota.go      # 配额用例
 │       └── user.go       # 用户用例
 ├── pkg/                   # 公共包
 │   ├── db/               # 数据库工具

@@ -4,13 +4,13 @@ import (
 	"context"
 
 	"github.com/9688101/HX/internal/entity"
-	"github.com/9688101/HX/pkg/utils"
+	"github.com/9688101/HX/pkg/helper"
 )
 
 // InsertUser 插入用户
 func (r *userRepo) InsertUser(ctx context.Context, user *entity.User, inviterId int) error {
 	// 此处可以进行密码加密（如果尚未加密），例如：
-	hashedPwd, err := utils.Password2Hash(user.Password)
+	hashedPwd, err := helper.Password2Hash(user.Password)
 	if err != nil {
 		return err
 	}

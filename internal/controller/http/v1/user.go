@@ -8,9 +8,10 @@ import (
 	"github.com/9688101/HX/internal/dyncfg"
 	"github.com/9688101/HX/internal/entity"
 	"github.com/9688101/HX/internal/usecase"
-	"github.com/9688101/HX/pkg"
-	"github.com/9688101/HX/pkg/ctxkey"
+	"github.com/9688101/HX/pkg/consts"
 	"github.com/9688101/HX/pkg/i18n"
+	"github.com/9688101/HX/pkg/valid"
+	"github.com/9688101/HX/pkg/verif"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
@@ -44,7 +45,7 @@ func (ctrl *UserController) RegisterUserHandler(c *gin.Context) {
 	}
 
 	// 进行输入验证
-	if err := pkg.Validate.Struct(&req); err != nil {
+	if err := valid.ValidateStruct(&req); err != nil {
 		c.JSON(http.StatusOK, BaseResponse{
 			Success: false,
 			Message: i18n.Translate(c, "invalid_input"),
@@ -217,7 +218,7 @@ func (ctrl *UserController) GetUserHandler(c *gin.Context) {
 		})
 		return
 	}
-	callerRole := c.GetInt(ctxkey.Role)
+	callerRole := c.GetInt(consts.Role)
 	user, err := ctrl.usecase.GetUser(c.Request.Context(), id, callerRole)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -245,7 +246,7 @@ func (ctrl *UserController) UpdateSelfHandler(c *gin.Context) {
 	}
 
 	// 获取当前用户 ID，从上下文中（例如 ctxkey.Id）
-	userID := c.GetInt(ctxkey.Id)
+	userID := c.GetInt(consts.Id)
 	if userID == 0 {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
@@ -270,7 +271,7 @@ func (ctrl *UserController) UpdateSelfHandler(c *gin.Context) {
 
 // // GetSelfHandler 处理获取当前用户信息的请求
 func (ctrl *UserController) GetSelfHandler(c *gin.Context) {
-	userID := c.GetInt(ctxkey.Id)
+	userID := c.GetInt(consts.Id)
 	if userID == 0 {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
@@ -330,7 +331,7 @@ func (ctrl *UserController) UpdateUserHandler(c *gin.Context) {
 		return
 	}
 
-	callerRole := c.GetInt(ctxkey.Role)
+	callerRole := c.GetInt(consts.Role)
 	if callerRole == 0 {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
@@ -365,7 +366,7 @@ func (ctrl *UserController) DeleteUserHandler(c *gin.Context) {
 		return
 	}
 
-	callerRole := c.GetInt(ctxkey.Role)
+	callerRole := c.GetInt(consts.Role)
 	if callerRole == 0 {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
@@ -458,7 +459,7 @@ func (ctrl *UserController) EmailBindHandler(c *gin.Context) {
 
 // GenerateAccessTokenHandler 处理生成访问令牌的请求
 func (ctrl *UserController) GenerateAccessTokenHandler(c *gin.Context) {
-	userID := c.GetInt(ctxkey.Id)
+	userID := c.GetInt(consts.Id)
 	if userID == 0 {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
@@ -483,7 +484,7 @@ func (ctrl *UserController) GenerateAccessTokenHandler(c *gin.Context) {
 
 // GetAffCodeHandler 处理获取邀请码的请求
 func (ctrl *UserController) GetAffCodeHandler(c *gin.Context) {
-	userID := c.GetInt(ctxkey.Id)
+	userID := c.GetInt(consts.Id)
 	if userID == 0 {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
@@ -516,14 +517,14 @@ func (ctrl *UserController) ResetPassword(c *gin.Context) {
 		})
 		return
 	}
-	if !pkg.VerifyCodeWithKey(req.Email, req.Token, pkg.PasswordResetPurpose) {
+	if !verif.VerifyCodeWithKey(req.Email, req.Token, verif.PasswordResetPurpose) {
 		c.JSON(http.StatusOK, gin.H{
 			"success": false,
 			"message": "重置链接非法或已过期",
 		})
 		return
 	}
-	password := pkg.GenerateVerificationCode(12)
+	password := verif.GenerateVerificationCode(12)
 	// err = ctrl.usecase.ResetUserPasswordByEmail(req.Email, password)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -532,7 +533,7 @@ func (ctrl *UserController) ResetPassword(c *gin.Context) {
 		})
 		return
 	}
-	pkg.DeleteKey(req.Email, pkg.PasswordResetPurpose)
+	verif.DeleteKey(req.Email, verif.PasswordResetPurpose)
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
