@@ -28,7 +28,7 @@ func isValidSubnet(subnet string) error {
 func isIpInSubnet(ctx context.Context, ip string, subnet string) bool {
 	_, ipNet, err := net.ParseCIDR(subnet)
 	if err != nil {
-		logger.Errorf(ctx, "failed to parse subnet: %s", err.Error())
+		logger.Error(ctx, "failed to parse subnet: %s", logger.ToZapField("subnet", subnet), logger.ToZapField("error", err))
 		return false
 	}
 	return ipNet.Contains(net.ParseIP(ip))

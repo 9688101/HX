@@ -8,5 +8,5 @@ import (
 func setDefaultValues() {
 	viper.SetDefault("system.system_name", "One API")
 	viper.SetDefault("server.address", "http://localhost")
-	viper.SetDefault("server.port", 3000)
+
 }

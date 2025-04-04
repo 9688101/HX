@@ -6,7 +6,8 @@ import (
 	"github.com/9688101/HX/pkg/helper"
 )
 
-func RequestId() func(c *gin.Context) {
+// RequestId 中间件：生成请求 ID，存入 Context 与响应头，方便日志追踪
+func RequestId() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := helper.GenRequestID()
 		c.Set(helper.RequestIdKey, id)

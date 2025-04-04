@@ -31,7 +31,7 @@ func InitRedisClient(cfg *config.RedisConfig) error {
 		logger.SysLog("Redis standalone mode")
 		opt, err := redis.ParseURL(url)
 		if err != nil {
-			logger.FatalLog("failed to parse Redis connection string: " + err.Error())
+			logger.SysFatal("failed to parse Redis connection string: " + err.Error())
 			return err
 		}
 		RDB = redis.NewClient(opt)
@@ -53,7 +53,7 @@ func InitRedisClient(cfg *config.RedisConfig) error {
 
 	_, err := RDB.Ping(ctx).Result()
 	if err != nil {
-		logger.FatalLog("Redis ping test failed: " + err.Error())
+		logger.SysFatal("Redis ping test failed: " + err.Error())
 		return err
 	}
 	return nil

@@ -29,7 +29,7 @@ func InitDB(cfg *config.DatabaseConfig) {
 	var err error
 	DB, err = ChooseDB(cfg)
 	if err != nil {
-		logger.FatalLog("failed to initialize database: " + err.Error())
+		logger.SysFatal("failed to initialize database: " + err.Error())
 		return
 	}
 
@@ -63,7 +63,7 @@ func SetDBConns(cfg *config.DatabaseConfig, db *gorm.DB) {
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		logger.FatalLog("failed to connect database: " + err.Error())
+		logger.SysFatal("failed to connect database: " + err.Error())
 		return
 	}
 
@@ -76,13 +76,13 @@ func SetDBConns(cfg *config.DatabaseConfig, db *gorm.DB) {
 // ChooseDB 根据配置选择数据库
 func ChooseDB(cfg *config.DatabaseConfig) (*gorm.DB, error) {
 	var dbConnection DatabaseConnection
-	options := cfg.DSN
+	dsn := cfg.DSN
 
 	switch {
-	case strings.HasPrefix(options, "postgres://"):
+	case strings.HasPrefix(dsn, "postgres://"):
 		// 使用 PostgreSQL
 		dbConnection = &PostgreSQLConnection{}
-	case options != "":
+	case dsn != "":
 		// 使用 MySQL
 		dbConnection = &MySQLConnection{}
 	default:

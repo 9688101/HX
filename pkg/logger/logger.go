@@ -3,158 +3,84 @@ package logger
 import (
 	"context"
 	"fmt"
-	"io"
-	"log"
-	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
 	"sync"
-	"time"
-
-	"github.com/gin-gonic/gin"
 
 	"github.com/9688101/HX/config"
-	"github.com/9688101/HX/pkg/helper"
+	"go.uber.org/zap"
 )
 
-type loggerLevel string
+// Logger 定义了日志接口，调用方只需依赖此接口
+type Logger interface {
+	Debug(ctx context.Context, msg string, fields ...zap.Field)
+	Info(ctx context.Context, msg string, fields ...zap.Field)
+	Warn(ctx context.Context, msg string, fields ...zap.Field)
+	Error(ctx context.Context, msg string, fields ...zap.Field)
+	Fatal(ctx context.Context, msg string, fields ...zap.Field)
+}
 
-const (
-	loggerDEBUG loggerLevel = "DEBUG"
-	loggerINFO  loggerLevel = "INFO"
-	loggerWarn  loggerLevel = "WARN"
-	loggerError loggerLevel = "ERROR"
-	loggerFatal loggerLevel = "FATAL"
+var (
+	loggerInstance Logger
+	once           sync.Once
 )
 
-var setupLogOnce sync.Once
-
-func SetupLogger() {
-	setupLogOnce.Do(func() {
-		if LogDir != "" {
-			var logPath string
-			if config.GetGeneralConfig().OnlyOneLogFile {
-				logPath = filepath.Join(LogDir, "HX.log")
-			} else {
-				logPath = filepath.Join(LogDir, fmt.Sprintf("HX-%s.log", time.Now().Format("20060102")))
-			}
-			fd, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-			if err != nil {
-				log.Fatal("failed to open log file")
-			}
-			gin.DefaultWriter = io.MultiWriter(os.Stdout, fd)
-			gin.DefaultErrorWriter = io.MultiWriter(os.Stderr, fd)
-		}
+// InitLogger 初始化全局日志实例，配置从外部传入
+func InitLogger(cfg *config.LoggerConfig) error {
+	fmt.Println("InitLogger", cfg)
+	var err error
+	once.Do(func() {
+		loggerInstance, err = newZapLogger(cfg)
 	})
+	return err
 }
 
-func SysLog(s string) {
-	logHelper(nil, loggerINFO, s)
+// GetLogger 返回全局日志实例
+func GetLogger() Logger {
+	return loggerInstance
 }
 
-func SysLogf(format string, a ...any) {
-	logHelper(nil, loggerINFO, fmt.Sprintf(format, a...))
+// ─────────────────────────────
+// 包级别便捷函数：直接调用 logger.Info/Debug/Warn/Error/Fatal
+// ─────────────────────────────
+
+func Debug(ctx context.Context, msg string, fields ...zap.Field) {
+	loggerInstance.Debug(ctx, msg, fields...)
 }
 
-func SysWarn(s string) {
-	logHelper(nil, loggerWarn, s)
+func Info(ctx context.Context, msg string, fields ...zap.Field) {
+	loggerInstance.Info(ctx, msg, fields...)
 }
 
-func SysWarnf(format string, a ...any) {
-	logHelper(nil, loggerWarn, fmt.Sprintf(format, a...))
+func Warn(ctx context.Context, msg string, fields ...zap.Field) {
+	loggerInstance.Warn(ctx, msg, fields...)
 }
 
-func SysError(s string) {
-	logHelper(nil, loggerError, s)
+func Error(ctx context.Context, msg string, fields ...zap.Field) {
+	loggerInstance.Error(ctx, msg, fields...)
 }
 
-func SysErrorf(format string, a ...any) {
-	logHelper(nil, loggerError, fmt.Sprintf(format, a...))
+func Fatal(ctx context.Context, msg string, fields ...zap.Field) {
+	loggerInstance.Fatal(ctx, msg, fields...)
 }
 
-func Debug(ctx context.Context, msg string) {
-	if !config.GetGeneralConfig().DebugEnabled {
-		return
-	}
-	logHelper(ctx, loggerDEBUG, msg)
+func SysLog(msg string, fields ...zap.Field) {
+	loggerInstance.Info(context.Background(), msg, fields...)
 }
 
-func Info(ctx context.Context, msg string) {
-	logHelper(ctx, loggerINFO, msg)
+func SysDebug(msg string, fields ...zap.Field) {
+	loggerInstance.Debug(context.Background(), msg, fields...)
 }
 
-func Warn(ctx context.Context, msg string) {
-	logHelper(ctx, loggerWarn, msg)
+func SysWarn(msg string, fields ...zap.Field) {
+	loggerInstance.Warn(context.Background(), msg, fields...)
 }
 
-func Error(ctx context.Context, msg string) {
-	logHelper(ctx, loggerError, msg)
+func SysError(msg string, fields ...zap.Field) {
+	loggerInstance.Error(context.Background(), msg, fields...)
 }
 
-func Debugf(ctx context.Context, format string, a ...any) {
-	if !config.GetGeneralConfig().DebugEnabled {
-		return
-	}
-	logHelper(ctx, loggerDEBUG, fmt.Sprintf(format, a...))
+func SysFatal(msg string, fields ...zap.Field) {
+	loggerInstance.Fatal(context.Background(), msg, fields...)
 }
-
-func Infof(ctx context.Context, format string, a ...any) {
-	logHelper(ctx, loggerINFO, fmt.Sprintf(format, a...))
-}
-
-func Warnf(ctx context.Context, format string, a ...any) {
-	logHelper(ctx, loggerWarn, fmt.Sprintf(format, a...))
-}
-
-func Errorf(ctx context.Context, format string, a ...any) {
-	logHelper(ctx, loggerError, fmt.Sprintf(format, a...))
-}
-
-func FatalLog(s string) {
-	logHelper(nil, loggerFatal, s)
-}
-
-func FatalLogf(format string, a ...any) {
-	logHelper(nil, loggerFatal, fmt.Sprintf(format, a...))
-}
-
-func logHelper(ctx context.Context, level loggerLevel, msg string) {
-	writer := gin.DefaultErrorWriter
-	if level == loggerINFO {
-		writer = gin.DefaultWriter
-	}
-	var requestId string
-	if ctx != nil {
-		rawRequestId := helper.GetRequestID(ctx)
-		if rawRequestId != "" {
-			requestId = fmt.Sprintf(" | %s", rawRequestId)
-		}
-	}
-	lineInfo, funcName := getLineInfo()
-	now := time.Now()
-	_, _ = fmt.Fprintf(writer, "[%s] %v%s%s %s%s \n", level, now.Format("2006/01/02 - 15:04:05"), requestId, lineInfo, funcName, msg)
-	SetupLogger()
-	if level == loggerFatal {
-		os.Exit(1)
-	}
-}
-
-func getLineInfo() (string, string) {
-	funcName := "[unknown] "
-	pc, file, line, ok := runtime.Caller(3)
-	if ok {
-		if fn := runtime.FuncForPC(pc); fn != nil {
-			parts := strings.Split(fn.Name(), ".")
-			funcName = "[" + parts[len(parts)-1] + "] "
-		}
-	} else {
-		file = "unknown"
-		line = 0
-	}
-	parts := strings.Split(file, "one-api/")
-	if len(parts) > 1 {
-		file = parts[1]
-	}
-	return fmt.Sprintf(" | %s:%d", file, line), funcName
+func SysInfo(msg string, fields ...zap.Field) {
+	loggerInstance.Info(context.Background(), msg, fields...)
 }

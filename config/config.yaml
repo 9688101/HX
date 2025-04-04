@@ -1,111 +1,60 @@
-system:
-  system_name: "HX"
-  notice: ""
-  about: ""
-  home_page_content: ""
-  footer: ""
-  logo: ""
-  theme: "default"
-  version: ""
-
 server:
-  address: "0.0.0.0"
   port: 3000
-  only_one_log_file: false
-  gin_mode: "release"
-
-
-authentication:
-  password_login_enabled: true
-  password_register_enabled: true
-  email_verification_enabled: false
-  github_oauth_enabled: false
-  oidc_enabled: false
-  wechat_auth_enabled: false
-  turnstile_check_enabled: false
-  register_enabled: true
-  email_domain_restriction_enabled: false
-  email_domain_whitelist:
-    - "gmail.com"
-    - "163.com"
-    - "126.com"
-    - "qq.com"
-    - "outlook.com"
-    - "hotmail.com"
-    - "icloud.com"
-    - "yahoo.com"
-    - "foxmail.com"
-
-debug:
-  debug_enabled: false
-  memory_cache_enabled: false
-
-smtp:
-  smtp_server: ""
-  smtp_port: 587
-  smtp_account: ""
-  smtp_from: ""
-  smtp_token: ""
-
-oauth:
-  github_client_id: ""
-  github_client_secret: ""
-  lark_client_id: ""
-  lark_client_secret: ""
-  oidc_client_id: ""
-  oidc_client_secret: ""
-  oidc_well_known: ""
-  oidc_authorization_endpoint: ""
-  oidc_token_endpoint: ""
-  oidc_userinfo_endpoint: ""
   session_secret: "3a9f8b2e5c1d7e6f4a0b9c8d2e5f1a3c7b6d8e9f0a1b2c3d4e5f6a7b8c9d0e1f"
-
-
-wechat:
-  wechat_server_address: ""
-  wechat_server_token: ""
-  wechat_account_qr_code_image_url: ""
-
-message:
-  message_pusher_address: ""
-  message_pusher_token: ""
-
-turnstile:
-  turnstile_site_key: ""
-  turnstile_secret_key: ""
-
+  system_name: "HX"
+  gin_mode: "release"
+  jwt_secret: "e5c1d7e6f4a0b9c8d2e5f1a3c7b6d8e9f0a1b2c3d4e5f6a7b8"
+  frontend_base_url: "http://localhost:3000"
 rate_limit:
-  global_api_rate_limit_num: 480
-  global_api_rate_limit_duration: 180
-  global_web_rate_limit_num: 240
-  global_web_rate_limit_duration: 180
+  global_api_rate_limit_num: 1000
+  global_api_rate_limit_duration: 60
+  global_web_rate_limit_num: 500
+  global_web_rate_limit_duration: 60
   upload_rate_limit_num: 10
   upload_rate_limit_duration: 60
   download_rate_limit_num: 10
   download_rate_limit_duration: 60
-  critical_rate_limit_num: 20
-  critical_rate_limit_duration: 1200
-  rate_limit_key_expiration_duration: "20m"
+  critical_rate_limit_num: 5
+  critical_rate_limit_duration: 60
+  rate_limit_key_expiration_duration: "1m"
 
 general:
-  initial_root_token: ""
-  initial_root_access_token: ""
-  root_user_email: ""
-  sync_frequency: 600
+  initial_root_token: "initial_root_token_value"
+  initial_root_access_token: "initial_root_access_token_value"
+  memory_cache_enabled: true
+  debug_enabled: false
+  only_one_log_file: true
 
 redis:
   redis_conn_string: ""
   redis_password: ""
   database: 0
-  redis_master_name: ""
-  sync_frequency: "600"
+  redis_master_name: "mymaster"
+  sync_frequency: "5m"
 
 database:
-  options: ""
+  dsn: ""
+  sql_max_idle_conns: 10
+  sql_max_open_conns: 100
+  sql_max_lifetime: 3600
   is_master_node: true
   debug_sql_enabled: false
-  sqlite_path: "hx.db"
-  sqlite_busy_timeout: 3000
+  sqlite_path: "db.sqlite3"
+  sqlite_busy_timeout: 5000
   using_sqlite: false
   using_postgresql: false
   using_mysql: false
+
+mail:
+  provider: "smtp"
+  smtp_account: "account@example.com"
+  smtp_token: "smtp_token_value"
+  smtp_server: "smtp.example.com"
+  smtp_port: 587
+  smtp_from: "noreply@example.com"
+
+logger:
+  log_dir: "logs"
+  only_one_log_file: false
+  debug_enabled: false
+  use_zap: true

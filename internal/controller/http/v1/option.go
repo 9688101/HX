@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/9688101/HX/internal/dyncfg"
@@ -32,6 +33,7 @@ func (ctrl *OptionController) GetOptions(c *gin.Context) {
 	var resp []entity.Option
 	for _, opt := range options {
 		resp = append(resp, *opt)
+		fmt.Println(opt.Key, opt.Value)
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

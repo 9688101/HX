@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 
 	"github.com/9688101/HX/config"
@@ -13,12 +14,6 @@ import (
 	"github.com/9688101/HX/pkg/helper"
 	"github.com/9688101/HX/pkg/logger"
 	"github.com/9688101/HX/pkg/random"
-)
-
-// 定义常量
-const (
-	appName    = "HX"     // 应用程序名称
-	appVersion = "v1.0.0" // 版本号
 )
 
 func CreateRootAccountIfNeed(db *gorm.DB) error {
@@ -47,21 +42,24 @@ func CreateRootAccountIfNeed(db *gorm.DB) error {
 	}
 	return nil
 }
-func start() {
+
+var (
+	appName    = "HUIXIONG AI" // 替换为你的应用名称
+	appVersion = "v1.0.0"      // 替换为你的应用版本
+)
+
+// start 启动帮助函数 (重新设计)
+func start(cfg *config.Config) {
 	// 获取当前时间
 	startTime := time.Now().Format("2006-01-02 15:04:05")
 
 	// 获取运行时环境信息
 	goVersion := runtime.Version() // Go 版本
-	os := runtime.GOOS             // 操作系统
+	osInfo := runtime.GOOS         // 操作系统
 	arch := runtime.GOARCH         // 架构
 
-	// 模拟配置信息和服务端口
-	configPath := "/path/to/config.yaml" // 配置文件路径
-	listenPort := 8080                   // 服务监听端口
-
 	// 显示启动动画
-	fmt.Println(color.CyanString("正在启动 %s %s...", appName, appVersion))
+	logger.SysInfo("正在启动 %s %s...", zap.String("appName", appName), zap.String("appVersion", appVersion))
 	for i := 0; i < 20; i++ {
 		fmt.Print(color.YellowString("█"))
 		time.Sleep(200 * time.Millisecond) // 每隔200毫秒显示一个方块
@@ -70,15 +68,15 @@ func start() {
 
 	// 显示启动信息
 	color.Green("╔════════════════════════════════════════════════╗")
-	color.Green("║          %s %s            ║", appName, appVersion)
+	color.Green("║          %s %s            ║", appName, appVersion)
 	color.Green("╚════════════════════════════════════════════════╝")
 	color.Blue("启动时间: %s", startTime)
 	color.Blue("运行环境:")
-	color.Magenta("  - 操作系统: %s", os)
-	color.Magenta("  - 架构: %s", arch)
-	color.Magenta("  - Go 版本: %s", goVersion)
-	color.Blue("配置文件: %s", configPath)
-	color.Blue("服务监听端口: %d", listenPort)
+	color.Magenta("  - 操作系统: %s", osInfo)
+	color.Magenta("  - 架构: %s", arch)
+	color.Magenta("  - Go 版本: %s", goVersion)
+	color.Blue("配置文件: %s", cfg.LoggerConfig.LogDir)
+	color.Blue("服务监听端口: %d", cfg.ServerConfig.Port)
 	color.Green("══════════════════════════════════════════════════")
 	color.Cyan("欢迎使用 %s！", appName)
 }

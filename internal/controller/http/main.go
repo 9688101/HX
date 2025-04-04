@@ -4,7 +4,6 @@ import (
 	"embed"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/9688101/HX/config"
@@ -14,7 +13,7 @@ import (
 
 func SetRouter(r *gin.Engine, buildFS embed.FS) {
 	SetApiRouter(r)
-	frontendBaseUrl := os.Getenv("FRONTEND_BASE_URL")
+	frontendBaseUrl := config.GetServerConfig().FrontendBaseUrl
 	if config.GetDatabaseConfig().IsMasterNode && frontendBaseUrl != "" {
 		frontendBaseUrl = ""
 		logger.SysLog("FRONTEND_BASE_URL is ignored on master node")

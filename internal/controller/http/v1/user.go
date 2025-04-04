@@ -2,6 +2,7 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -150,6 +151,7 @@ func (ctrl *UserController) setupLogin(user *entity.User, c *gin.Context) {
 
 // // LogoutHandler 处理用户注销请求，清除 session
 func (ctrl *UserController) LogoutHandler(c *gin.Context) {
+	fmt.Println("LogoutHandler")
 	session := sessions.Default(c)
 	session.Clear()
 	if err := session.Save(); err != nil {
