@@ -13,7 +13,6 @@ import (
 	"github.com/9688101/HX/internal/entity"
 	"github.com/9688101/HX/pkg/helper"
 	"github.com/9688101/HX/pkg/logger"
-	"github.com/9688101/HX/pkg/random"
 )
 
 func CreateRootAccountIfNeed(db *gorm.DB) error {
@@ -25,18 +24,11 @@ func CreateRootAccountIfNeed(db *gorm.DB) error {
 		if err != nil {
 			return err
 		}
-		accessToken := random.GetUUID()
-		if config.GetGeneralConfig().InitialRootAccessToken != "" {
-			accessToken = config.GetGeneralConfig().InitialRootAccessToken
-		}
 		rootUser := entity.User{
-			Username:    "root",
-			Password:    hashedPassword,
-			Role:        entity.RoleRootUser,
-			Status:      entity.UserStatusEnabled,
-			DisplayName: "Root User",
-			AccessToken: accessToken,
-			AffCode:     random.GetRandomString(4),
+			Username: "root",
+			Password: hashedPassword,
+			Role:     entity.RoleRootUser,
+			Status:   entity.UserStatusEnabled,
 		}
 		db.Create(&rootUser)
 	}
@@ -62,7 +54,7 @@ func start(cfg *config.Config) {
 	logger.SysInfo("正在启动 %s %s...", zap.String("appName", appName), zap.String("appVersion", appVersion))
 	for i := 0; i < 20; i++ {
 		fmt.Print(color.YellowString("█"))
-		time.Sleep(200 * time.Millisecond) // 每隔200毫秒显示一个方块
+		time.Sleep(5 * time.Millisecond) // 每隔200毫秒显示一个方块
 	}
 	fmt.Println()
 

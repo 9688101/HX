@@ -3,116 +3,98 @@ package middleware
 import (
 	"net/http"
 	"strings"
+	"time"
 
-	"github.com/9688101/HX/config"
-	"github.com/9688101/HX/internal/entity"
-	"github.com/9688101/HX/pkg/blacklist"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v4"
 )
 
-// CustomClaims 自定义 JWT Claims
-type CustomClaims struct {
+var jwtSecret = []byte("your-secret-key") // 在实际应用中应该从配置文件读取
+
+type Claims struct {
+	UserID   uint   `json:"userid"`
 	Username string `json:"username"`
-	Role     int    `json:"role"`
-	ID       int    `json:"id"`
-	Status   int    `json:"status"`
-	jwt.RegisteredClaims
+	jwt.StandardClaims
 }
 
-// jwtAuthHelper 解析 JWT 并判断权限，minRole 为最低权限要求
-func jwtAuthHelper(c *gin.Context, minRole int) {
-	// 从 Authorization 头中获取 token，通常格式为 "Bearer token..."
-	authHeader := c.GetHeader("Authorization")
-	if authHeader == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"message": "Missing Authorization header",
-		})
-		c.Abort()
-		return
-	}
-
-	// 解析 Bearer token
-	tokenString := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer"))
-	if tokenString == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"message": "Token not provided",
-		})
-		c.Abort()
-		return
-	}
-
-	// 解析 token，使用配置中的 JWT Secret
-	secret := config.GetServerConfig().JWTSecret // 假设该函数返回 JWT secret 字符串
-	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secret), nil
-	})
-	if err != nil || !token.Valid {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"message": "Invalid token",
-		})
-		c.Abort()
-		return
-	}
-
-	// 转换 claims 为自定义类型
-	claims, ok := token.Claims.(*CustomClaims)
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"message": "Invalid token claims",
-		})
-		c.Abort()
-		return
-	}
-
-	// 判断用户状态是否正常，以及是否被封禁
-	if claims.Status == entity.UserStatusDisabled || blacklist.IsUserBanned(claims.ID) {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": "用户已被封禁",
-		})
-		c.Abort()
-		return
-	}
-
-	// 判断用户权限是否满足要求
-	if claims.Role < minRole {
-		c.JSON(http.StatusOK, gin.H{
-			"success": false,
-			"message": "无权进行此操作，权限不足",
-		})
-		c.Abort()
-		return
-	}
-
-	// 将用户信息存入 Gin 的 Context，方便后续使用
-	c.Set("username", claims.Username)
-	c.Set("role", claims.Role)
-	c.Set("id", claims.ID)
-	c.Next()
-}
-
-// JWTUserAuth 针对普通用户的 JWT 认证中间件
-func JWTUserAuth() gin.HandlerFunc {
+// JWTAuth Gin中间件函数
+func JWTAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		jwtAuthHelper(c, entity.RoleCommonUser)
+		// 从请求中获取token
+		tokenString := extractToken(c)
+		if tokenString == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code": 401,
+				"msg":  "Unauthorized",
+			})
+			c.Abort()
+			return
+		}
+
+		// 解析token
+		claims := &Claims{}
+		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+			return jwtSecret, nil
+		})
+
+		if err != nil || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code": 401,
+				"msg":  "Invalid token",
+			})
+			c.Abort()
+			return
+		}
+
+		// 将用户信息存储到上下文中
+		c.Set("user", claims)
+		c.Next()
 	}
 }
 
-// JWTAdminAuth 针对管理员的 JWT 认证中间件
-func JWTAdminAuth() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		jwtAuthHelper(c, entity.RoleAdminUser)
+// 从请求中提取token
+func extractToken(c *gin.Context) string {
+	// 1. 首先尝试从URL参数获取
+	token := c.Query("token")
+	if token != "" {
+		return token
 	}
+
+	// 2. 然后尝试从Authorization头获取
+	bearerToken := c.GetHeader("Authorization")
+	if len(strings.Split(bearerToken, " ")) == 2 {
+		return strings.Split(bearerToken, " ")[1]
+	}
+
+	// 3. 最后尝试从cookie获取
+	token, err := c.Cookie("token")
+	if err == nil {
+		return token
+	}
+
+	return ""
 }
 
-// JWTRootAuth 针对超级管理员的 JWT 认证中间件
-func JWTRootAuth() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		jwtAuthHelper(c, entity.RoleRootUser)
+// GenerateToken 生成JWT token
+func GenerateToken(userID uint, username string) (string, error) {
+	expirationTime := time.Now().Add(24 * time.Hour)
+	claims := &Claims{
+		UserID:   userID,
+		Username: username,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
 	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(jwtSecret)
+}
+
+// GetUserFromContext 从上下文中获取用户信息
+func GetUserFromContext(c *gin.Context) (*Claims, bool) {
+	user, exists := c.Get("user")
+	if !exists {
+		return nil, false
+	}
+	claims, ok := user.(*Claims)
+	return claims, ok
 }

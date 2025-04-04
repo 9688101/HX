@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"fmt"
-
 	"github.com/9688101/HX/internal/entity"
 	"github.com/9688101/HX/pkg/blacklist"
 	"github.com/gin-contrib/sessions"
@@ -17,10 +15,6 @@ func authHelper(c *gin.Context, minRole int) {
 	role := session.Get("role")
 	id := session.Get("id")
 	status := session.Get("status")
-	fmt.Println("username", username)
-	fmt.Println("role", role)
-	fmt.Println("id", id)
-	fmt.Println("status", status)
 	if username == nil {
 		// Check access token
 		accessToken := c.Request.Header.Get("Authorization")

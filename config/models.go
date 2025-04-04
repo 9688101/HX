@@ -36,12 +36,13 @@ type MailConfig struct {
 
 // ServerConfig 定义服务器相关配置
 type ServerConfig struct {
-	Port            int    `mapstructure:"port" yaml:"port"`                           // 服务器监听端口
+	Port            string `mapstructure:"port" yaml:"port"`                           // 服务器监听端口
 	SessionSecret   string `mapstructure:"session_secret" yaml:"session_secret"`       // 会话加密密钥
 	SystemName      string `mapstructure:"system_name" yaml:"system_name"`             // 系统名称
 	GINMode         string `mapstructure:"gin_mode" yaml:"gin_mode"`                   // Gin 运行模式（如 "debug", "release"）
 	JWTSecret       string `mapstructure:"jwt_secret" yaml:"jwt_secret"`               // JWT 密钥
 	FrontendBaseUrl string `mapstructure:"frontend_base_url" yaml:"frontend_base_url"` // 前端基础 URL
+	Theme           string `mapstructure:"theme" yaml:"theme"`                         // 主题
 }
 
 // RedisConfig 定义 Redis 相关配置

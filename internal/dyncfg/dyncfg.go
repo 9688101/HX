@@ -4,86 +4,72 @@ import (
 	"strings"
 )
 
-var EmailDomainWhitelist = []string{
-	"gmail.com",
-	"163.com",
-	"126.com",
-	"qq.com",
-	"outlook.com",
-	"hotmail.com",
-	"icloud.com",
-	"yahoo.com",
-	"foxmail.com",
-}
+var EmailDomainWhitelist []string
 
-var Themes = map[string]bool{
-	"default": true,
-	"berry":   true,
-	"air":     true,
-}
+var Themes map[string]bool
 
 // 开关
-var PasswordLoginEnabled = true
-var PasswordRegisterEnabled = true
-var EmailVerificationEnabled = false
-var GitHubOAuthEnabled = false
-var OidcEnabled = false
-var WeChatAuthEnabled = false
-var TurnstileCheckEnabled = false
-var RegisterEnabled = true
-var EmailDomainRestrictionEnabled = true
+var PasswordLoginEnabled bool
+var PasswordRegisterEnabled bool
+var EmailVerificationEnabled bool
+var GitHubOAuthEnabled bool
+var OidcEnabled bool
+var WeChatAuthEnabled bool
+var TurnstileCheckEnabled bool
+var RegisterEnabled bool
+var EmailDomainRestrictionEnabled bool
 
 // 数据
-var SystemName = "晖雄 AI"
-var ServerAddress = ""
-var Footer = ""
-var Logo = ""
-var HomePageContent = ""
-var About = ""
-var Notice = ""
-var Theme = "default"
+var SystemName string
+var ServerAddress string
+var Footer string
+var Logo string
+var HomePageContent string
+var About string
+var Notice string
+var Theme string
 
-var SMTPServer = ""
-var SMTPPort = 587
-var SMTPAccount = ""
-var SMTPFrom = ""
-var SMTPToken = ""
+var SMTPServer string
+var SMTPPort int
+var SMTPAccount string
+var SMTPFrom string
+var SMTPToken string
 
-var GitHubClientId = ""
-var GitHubClientSecret = ""
+var GitHubClientId string
+var GitHubClientSecret string
 
-var LarkClientId = ""
-var LarkClientSecret = ""
+var LarkClientId string
+var LarkClientSecret string
 
-var OidcClientId = ""
-var OidcClientSecret = ""
-var OidcWellKnown = ""
-var OidcAuthorizationEndpoint = ""
-var OidcTokenEndpoint = ""
-var OidcUserinfoEndpoint = ""
+var OidcClientId string
+var OidcClientSecret string
+var OidcWellKnown string
+var OidcAuthorizationEndpoint string
+var OidcTokenEndpoint string
+var OidcUserinfoEndpoint string
 
-var WeChatServerAddress = ""
-var WeChatServerToken = ""
-var WeChatAccountQRCodeImageURL = ""
+var WeChatServerAddress string
+var WeChatServerToken string
+var WeChatAccountQRCodeImageURL string
 
-var MessagePusherAddress = ""
-var MessagePusherToken = ""
+var MessagePusherAddress string
+var MessagePusherToken string
 
-var TurnstileSiteKey = ""
-var TurnstileSecretKey = ""
+var TurnstileSiteKey string
+var TurnstileSecretKey string
 
-var RootUserEmail = ""
+var RootUserEmail string
 
-func SetEmailDomainWhitelist(key, val string) {
-	EmailDomainWhitelist = strings.Split(val, val)
+func SetEmailDomainWhitelist(val string) {
+	EmailDomainWhitelist = strings.Split(val, ",")
 }
-func SetValidThemes(key string, val bool) {
-	Themes[key] = val
+func SetValidThemes(val string) {
+	Themes[val] = true
 }
 
 // validateConfig performs custom configuration validation.
-func ValidThemes(key string) bool {
-	if !Themes[key] {
+func ValidThemes(val string) bool {
+	if _, ok := Themes[val]; !ok {
 		return false
 	}
 	return true

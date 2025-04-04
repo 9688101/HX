@@ -16,9 +16,9 @@ func (e *ConfigError) Error() string {
 
 // validateConfig performs custom configuration validation.
 func validateConfig() error {
-	if GlobalConfig.ServerConfig.Port <= 0 || GlobalConfig.ServerConfig.Port > 65535 {
-		return NewConfigError("server.port", "must be between 1 and 65535")
-	}
+	// if GlobalConfig.ServerConfig.Port <= 0 || GlobalConfig.ServerConfig.Port > 65535 {
+	// 	return NewConfigError("server.port", "must be between 1 and 65535")
+	// }
 	// if GlobalConfig.RateLimitConfig.RateLimitKeyExpirationDuration <= 0 {
 	// 	GlobalConfig.RateLimitConfig.RateLimitKeyExpirationDuration = time.Minute * 5 // Default rate limit key expiration
 	// }

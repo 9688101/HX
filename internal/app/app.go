@@ -2,8 +2,7 @@ package app
 
 import (
 	"embed"
-	"os"
-	"strconv"
+	"fmt"
 
 	"github.com/9688101/HX/config"
 	v1 "github.com/9688101/HX/internal/controller/http"
@@ -16,7 +15,6 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
 // Run 启动应用程序
@@ -60,22 +58,27 @@ func Run(buildFS embed.FS) {
 	}
 
 	// Initialize HTTP server
-	server := gin.New()
-	server.Use(gin.Recovery())
+	server := gin.Default()
+	// server.Use(gin.Recovery())
 	// This will cause SSE not to work!!!
 	//server.Use(gzip.Gzip(gzip.DefaultCompression))
-	server.Use(middleware.RequestId())
-	server.Use(middleware.Language())
-	server.Use(middleware.GinLoggerMiddleware())
+	// server.Use(middleware.RequestId())
+	// server.Use(middleware.Language())
+	// server.Use(middleware.GinLoggerMiddleware())
+	// server.Use(middleware.CORS())
+	// server.Use(middleware.Cache())
+	// server.Use(middleware.TurnstileCheck())
+	server.Use(middleware.JWTAuth())
 	// Initialize session store
 	store := cookie.NewStore([]byte(cfg.ServerConfig.SessionSecret))
 	server.Use(sessions.Sessions("session", store))
 	v1.SetRouter(server, buildFS)
-	var port = os.Getenv("PORT")
-	if port == "" {
-		port = strconv.Itoa(cfg.ServerConfig.Port)
+	var port = cfg.ServerConfig.Port
+	logger.SysInfo("server started on http://localhost:" + port)
+	for _, route := range server.Routes() {
+		fmt.Printf("%-6s -> %-40s  Handler: %s\n", route.Method, route.Path, route.Handler)
 	}
-	logger.SysInfo("server started on http://localhost:%s", zap.String("port", port))
+
 	start(cfg) // 调用重新设计的 start 函数，并传递配置和日志器
 	err = server.Run(":" + port)
 	if err != nil {

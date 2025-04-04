@@ -1,6 +1,9 @@
 package v1
 
-import "github.com/9688101/HX/internal/usecase"
+import (
+	"github.com/9688101/HX/internal/entity"
+	"github.com/9688101/HX/internal/usecase"
+)
 
 type UserController struct {
 	usecase usecase.UserUseCase
@@ -13,6 +16,23 @@ func NewUserController(uc usecase.UserUseCase) *UserController {
 	}
 }
 
+type LoginRequest struct {
+	Username  string `json:"username"`
+	Password  string `json:"password"`
+	AutoLogin bool   `json:"autoLogin"`
+	Type      string `json:"type"`
+}
+
+type LoginResponse struct {
+	Status           string `json:"status"`
+	Type             string `json:"type"`
+	CurrentAuthority string `json:"currentAuthority"`
+}
+
+type UserInfoResponse struct {
+	Data entity.User `json:"data"`
+}
+
 // BaseResponse 定义了所有回复的公共字段
 type BaseResponse struct {
 	Success bool   `json:"success"` // 表示操作是否成功
@@ -23,4 +43,13 @@ type BaseResponse struct {
 type Response struct {
 	BaseResponse
 	Data interface{} `json:"data,omitempty"` // 数据部分，根据需要可以是 map、结构体、数组等
+}
+
+// RuleList 规则列表响应
+type RuleList struct {
+	Data     []Rule `json:"data"`
+	Total    int    `json:"total"`
+	Success  bool   `json:"success"`
+	PageSize int    `json:"pageSize"`
+	Current  int    `json:"current"`
 }

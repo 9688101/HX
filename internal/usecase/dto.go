@@ -1,27 +1,24 @@
 package usecase
 
 import (
-	"context"
-
-	"github.com/9688101/HX/internal/entity"
 	"github.com/9688101/HX/internal/repo"
 )
 
 type UserUseCase interface {
-	RegisterUser(ctx context.Context, req RegisterUserRequest) error
-	Login(ctx context.Context, username, password string) (*entity.User, error)
-	GetUserList(ctx context.Context, offset, limit int, order string) ([]*entity.User, error)
-	SearchUsers(ctx context.Context, keyword string) ([]*entity.User, error)
-	GetUser(ctx context.Context, id int, callerRole int) (*entity.User, error)
-	UpdateSelf(ctx context.Context, req UpdateSelfRequest, userID int) error
-	GetSelf(ctx context.Context, userID int) (*entity.User, error)
-	DeleteSelf(ctx context.Context, userID int) error
-	UpdateUser(ctx context.Context, req UpdateUserRequest, callerRole int) error
-	DeleteUser(ctx context.Context, id int, callerRole int) error
-	ManageUser(ctx context.Context, req ManageRequest, callerRole int) (*entity.User, error)
-	BindEmail(ctx context.Context, email, code string, userID int) error
-	GetAffCode(ctx context.Context, userID int) (string, error)
-	GenerateAccessToken(ctx context.Context, userID int) (string, error)
+	// RegisterUser(ctx context.Context, req RegisterUserRequest) error
+	// Login(ctx context.Context, username, password string) (*entity.User, error)
+	// GetUserList(ctx context.Context, offset, limit int, order string) ([]*entity.User, error)
+	// SearchUsers(ctx context.Context, keyword string) ([]*entity.User, error)
+	// GetUser(ctx context.Context, id int, callerRole int) (*entity.User, error)
+	// UpdateSelf(ctx context.Context, req UpdateSelfRequest, userID int) error
+	// GetSelf(ctx context.Context, userID int) (*entity.User, error)
+	// DeleteSelf(ctx context.Context, userID int) error
+	// UpdateUser(ctx context.Context, req UpdateUserRequest, callerRole int) error
+	// DeleteUser(ctx context.Context, id int, callerRole int) error
+	// ManageUser(ctx context.Context, req ManageRequest, callerRole int) (*entity.User, error)
+	// BindEmail(ctx context.Context, email, code string, userID int) error
+	// GetAffCode(ctx context.Context, userID int) (string, error)
+	// GenerateAccessToken(ctx context.Context, userID int) (string, error)
 }
 
 type userUseCase struct {
@@ -69,8 +66,8 @@ type UpdateUserRequest struct {
 
 // ManageRequest 定义了管理员管理用户的请求结构体
 type ManageRequest struct {
-	Username string `json:"username" binding:"required"`
-	Action   string `json:"action" binding:"required"`
+	name   string `json:"username" binding:"required"`
+	Action string `json:"action" binding:"required"`
 }
 
 type PasswordResetRequest struct {
